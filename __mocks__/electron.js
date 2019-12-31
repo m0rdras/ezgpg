@@ -4,7 +4,13 @@ const ipcRenderer = {
     send: jest.fn()
 };
 
+const ipcMain = {
+    on: jest.fn(),
+    off: jest.fn(),
+    send: jest.fn()
+};
+
 module.exports = {
-    remote: { dialog: { showErrorBox: jest.fn() } },
+    ipcMain,
     ipcRenderer
 };
