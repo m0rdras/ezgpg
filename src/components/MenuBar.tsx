@@ -1,6 +1,6 @@
 import React from 'react';
-import { Header, Icon, Menu } from 'semantic-ui-react';
 import { NavLink, NavLinkProps } from 'react-router-dom';
+import { Header, Icon, Menu } from 'semantic-ui-react';
 
 export const MenuNavLink: React.FC<NavLinkProps> = props => (
     <NavLink exact {...props} />

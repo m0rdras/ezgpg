@@ -1,12 +1,20 @@
 {
     "defaultSeverity": "error",
     "extends": ["tslint:latest"],
-    "jsRules": {},
+    "jsRules": {
+        "quotemark": [true, "single"]
+    },
     "rules": {
+        "arrow-parens": false,
+        "no-object-literal-type-assertion": false,
         "no-implicit-dependencies": [true, "dev"],
         "no-var-requires": false,
         "quotemark": [true, "single"],
-        "no-console": false
+        "no-console": false,
+        "trailing-comma": false,
+        "max-classes-per-file": false,
+        "member-access": false,
+        "no-submodule-imports": [true, "mobx-react-lite/optimizeForReactDom"]
     },
     "rulesDirectory": []
 }

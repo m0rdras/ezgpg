@@ -1,7 +1,8 @@
+import Electron from 'electron';
+import { destroy } from 'mobx-state-tree';
+
 import { Events } from '../Constants';
 import { CryptStore } from './CryptStore';
-import { destroy } from 'mobx-state-tree';
-import Electron from 'electron';
 
 describe('CryptStore', () => {
     let deps: {
@@ -25,8 +26,8 @@ describe('CryptStore', () => {
     beforeEach(() => {
         deps = {
             ipcRenderer: {
-                on: jest.fn(),
                 off: jest.fn(),
+                on: jest.fn(),
                 send: jest.fn()
             }
         };
@@ -62,8 +63,8 @@ describe('CryptStore', () => {
         const store = createStore();
         store.setPending(true);
         store.handleGpgCryptResponse({} as Electron.IpcRendererEvent, {
-            text: 'crypted',
-            encrypted: true
+            encrypted: true,
+            text: 'crypted'
         });
         expect(store.pending).toBe(false);
         expect(store.output.val).toEqual('crypted');

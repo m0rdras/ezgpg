@@ -1,7 +1,8 @@
-import Gpg, { GpgError } from './Gpg';
-import concat from 'concat-stream';
-import { Readable, Writable } from 'stream';
 import { ChildProcessWithoutNullStreams } from 'child_process';
+import concat from 'concat-stream';
+
+import { Readable, Writable } from 'stream';
+import Gpg, { GpgError } from './Gpg';
 
 const ezGpgKeyId = '058CAFED420D6BEEF71B844EBD76DEAD02758394';
 const izzyGpgKeyId = 'DEADBEEF420D6BEEF71B844EBD76DEAD02758394';
@@ -53,9 +54,13 @@ describe('Gpg', () => {
             exitCode = 0;
             gpgArgs = args;
             stdoutStream = new Readable();
-            stdoutStream._read = () => {};
+            stdoutStream._read = () => {
+                /* noop */
+            };
             stderrStream = new Readable();
-            stderrStream._read = () => {};
+            stderrStream._read = () => {
+                /* noop */
+            };
             stdinStream = concat((buf: Buffer) => {
                 stdin = buf.toString();
             });
@@ -74,10 +79,10 @@ describe('Gpg', () => {
             setTimeout(() => closeHandler?.(exitCode, 'SIGTERM'), 0);
 
             return {
-                stdin: stdinStream,
-                stdout: stdoutStream,
+                on: eventHandler,
                 stderr: stderrStream,
-                on: eventHandler
+                stdin: stdinStream,
+                stdout: stdoutStream
             } as ChildProcessWithoutNullStreams;
         };
 
@@ -113,14 +118,14 @@ describe('Gpg', () => {
 
             await expect(result).resolves.toEqual([
                 {
+                    email: 'ezgpg@dev.local',
                     id: ezGpgKeyId,
-                    name: 'ezGPG',
-                    email: 'ezgpg@dev.local'
+                    name: 'ezGPG'
                 },
                 {
+                    email: 'izzy@dev.local',
                     id: izzyGpgKeyId,
-                    name: 'Izzy Geepegee',
-                    email: 'izzy@dev.local'
+                    name: 'Izzy Geepegee'
                 }
             ]);
         });

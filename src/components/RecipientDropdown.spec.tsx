@@ -1,8 +1,9 @@
-import React from 'react';
 import { shallow } from 'enzyme';
-import RecipientDropdown from './RecipientDropdown';
-import { GpgKeyStore } from '../stores/GpgKeyStore';
+import React from 'react';
 import { Dropdown } from 'semantic-ui-react';
+
+import { GpgKeyStore } from '../stores/GpgKeyStore';
+import RecipientDropdown from './RecipientDropdown';
 
 describe('RecipientDropdown', () => {
     const ipcRendererMock = { on: jest.fn() };

@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron';
-import createRootStore, { RootStore } from './RootStore';
+
 import { Events } from '../Constants';
+import createRootStore, { RootStore } from './RootStore';
 
 type SendMockFn = jest.MockedFunction<
     (channel: string, ...args: any[]) => void
@@ -10,16 +11,6 @@ describe('RootStore', () => {
     const createStore = () => {
         return RootStore.create(
             {
-                gpgKeyStore: {
-                    gpgKeys: {
-                        alpha: {
-                            id: 'alpha',
-                            name: 'alpha user',
-                            email: 'alpha@user.com'
-                        }
-                    },
-                    selectedKeys: ['alpha']
-                },
                 cryptStore: {
                     input: {
                         val: 'input'
@@ -28,10 +19,20 @@ describe('RootStore', () => {
                         val: 'output'
                     },
                     pending: false
+                },
+                gpgKeyStore: {
+                    gpgKeys: {
+                        alpha: {
+                            email: 'alpha@user.com',
+                            id: 'alpha',
+                            name: 'alpha user'
+                        }
+                    },
+                    selectedKeys: ['alpha']
                 }
             },
             {
-                ipcRenderer: ipcRenderer
+                ipcRenderer
             }
         );
     };
@@ -41,8 +42,8 @@ describe('RootStore', () => {
         expect((ipcRenderer.send as SendMockFn).mock.calls[0]).toEqual([
             Events.CRYPT,
             {
-                text: 'input',
-                recipients: ['alpha']
+                recipients: ['alpha'],
+                text: 'input'
             }
         ]);
     });

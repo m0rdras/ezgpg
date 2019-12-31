@@ -1,25 +1,26 @@
 import debug from 'debug';
-import { getEnv, Instance, SnapshotIn, types } from 'mobx-state-tree';
-import { CryptStore } from './CryptStore';
-import { GpgKeyStore } from './GpgKeyStore';
 import { ipcRenderer } from 'electron';
 import { autorun, IReactionDisposer } from 'mobx';
+import { getEnv, Instance, SnapshotIn, types } from 'mobx-state-tree';
+
 import { Events } from '../Constants';
+import { CryptStore } from './CryptStore';
+import { GpgKeyStore } from './GpgKeyStore';
 
 const log = debug('ezgpg:rootStore');
 
 export const RootStore = types
     .model('RootStore', {
-        gpgKeyStore: GpgKeyStore,
-        cryptStore: CryptStore
+        cryptStore: CryptStore,
+        gpgKeyStore: GpgKeyStore
     })
     .actions(self => {
         let disposer: IReactionDisposer;
 
         const onInputChange = () => {
             const payload = {
-                text: self.cryptStore.input.val,
-                recipients: self.gpgKeyStore.selectedKeyIds
+                recipients: self.gpgKeyStore.selectedKeyIds,
+                text: self.cryptStore.input.val
             };
             log('Sending to main: %O', payload);
             self.cryptStore.setPending(true);
@@ -39,10 +40,6 @@ export interface IRootStore extends Instance<typeof RootStore> {}
 
 export default function createRootStore(ipc = ipcRenderer) {
     const snapshot: SnapshotIn<typeof RootStore> = {
-        gpgKeyStore: {
-            gpgKeys: {},
-            selectedKeys: []
-        },
         cryptStore: {
             input: {
                 val: ''
@@ -51,6 +48,10 @@ export default function createRootStore(ipc = ipcRenderer) {
                 val: ''
             },
             pending: false
+        },
+        gpgKeyStore: {
+            gpgKeys: {},
+            selectedKeys: []
         }
     };
     const deps = { ipcRenderer: ipc };

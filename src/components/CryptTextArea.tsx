@@ -1,16 +1,17 @@
+import { observer } from 'mobx-react-lite';
 import React, { FormEvent } from 'react';
 import { Form, TextArea } from 'semantic-ui-react';
-import { observer } from 'mobx-react-lite';
-import { IIOText } from '../stores/CryptStore';
-import Gpg from '../main/Gpg';
 
-type CryptTextAreaProps = {
+import Gpg from '../main/Gpg';
+import { IIOText } from '../stores/CryptStore';
+
+interface ICryptTextAreaProps {
     label?: string;
     readOnly?: boolean;
     text: IIOText;
-};
+}
 
-const CryptTextArea: React.FC<CryptTextAreaProps> = observer(
+const CryptTextArea: React.FC<ICryptTextAreaProps> = observer(
     ({ label, readOnly, text }) => {
         return (
             <Form.Field>

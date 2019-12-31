@@ -1,13 +1,14 @@
 import debug from 'debug';
-import { types, Instance, getEnv } from 'mobx-state-tree';
+import { getEnv, Instance, types } from 'mobx-state-tree';
+
 import { Events } from '../Constants';
 
 const log = debug('ezgpg:gpgKeyStore');
 
 export const GpgKey = types.model('GpgKey', {
+    email: types.maybe(types.string),
     id: types.identifier,
-    name: types.maybe(types.string),
-    email: types.maybe(types.string)
+    name: types.maybe(types.string)
 });
 export interface IGpgKey extends Instance<typeof GpgKey> {}
 

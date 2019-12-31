@@ -1,7 +1,8 @@
-import { ipcMain } from 'electron';
-import Gpg from './Gpg';
 import debug from 'debug';
+import { ipcMain } from 'electron';
+
 import { Events } from '../Constants';
+import Gpg from './Gpg';
 
 const log = debug('ezgpg:main');
 
@@ -31,13 +32,13 @@ export default class Main {
         const { text, recipients } = data;
         if (Gpg.isEncrypted(text)) {
             event.reply(Events.CRYPT_RESULT, {
-                text: await this.gpg.decrypt(text),
-                encrypted: false
+                encrypted: false,
+                text: await this.gpg.decrypt(text)
             });
         } else if (text.length > 0 && recipients.length > 0) {
             event.reply(Events.CRYPT_RESULT, {
-                text: await this.gpg.encrypt(text, recipients),
-                encrypted: true
+                encrypted: true,
+                text: await this.gpg.encrypt(text, recipients)
             });
         } else {
             event.reply(Events.CRYPT_RESULT, { text: '', encrypted: false });

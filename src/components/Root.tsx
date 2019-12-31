@@ -1,18 +1,19 @@
-import { hot } from 'react-hot-loader';
 import React from 'react';
-import { Container } from 'semantic-ui-react';
+import { hot } from 'react-hot-loader';
 import { MemoryRouter as Router, Route, Switch } from 'react-router-dom';
+import { Container } from 'semantic-ui-react';
+
 import { IRootStore } from '../stores/RootStore';
 import CryptPage from './CryptPage';
 import KeysPage from './KeysPage';
-import SettingsPage from './SettingsPage';
 import MenuBar from './MenuBar';
+import SettingsPage from './SettingsPage';
 
-type RootProps = {
+interface IRootProps {
     store: IRootStore;
-};
+}
 
-const Root: React.FC<RootProps> = ({ store }) => {
+const Root: React.FC<IRootProps> = ({ store }) => {
     return (
         <Router>
             <div>

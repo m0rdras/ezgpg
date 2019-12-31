@@ -1,8 +1,9 @@
-import React from 'react';
 import { shallow } from 'enzyme';
-import KeysPage from './KeysPage';
-import { GpgKeyStore } from '../stores/GpgKeyStore';
+import React from 'react';
 import { Table } from 'semantic-ui-react';
+
+import { GpgKeyStore } from '../stores/GpgKeyStore';
+import KeysPage from './KeysPage';
 
 describe('KeysPage', () => {
     const ipcRendererMock = { on: jest.fn() };

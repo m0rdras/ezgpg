@@ -1,7 +1,8 @@
-import React from 'react';
 import { shallow } from 'enzyme';
-import MenuBar, { MenuNavLink } from './MenuBar';
+import React from 'react';
 import { Menu } from 'semantic-ui-react';
+
+import MenuBar, { MenuNavLink } from './MenuBar';
 
 describe('MenuBar', () => {
     it('should render', () => {

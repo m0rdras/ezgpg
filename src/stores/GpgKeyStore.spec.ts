@@ -1,6 +1,7 @@
-import { GpgKeyStore, IGpgKeyStore } from './GpgKeyStore';
 import { destroy } from 'mobx-state-tree';
+
 import { Events } from '../Constants';
+import { GpgKeyStore, IGpgKeyStore } from './GpgKeyStore';
 
 describe('GpgKeyStore', () => {
     let deps: {
@@ -14,8 +15,8 @@ describe('GpgKeyStore', () => {
     beforeEach(() => {
         deps = {
             ipcRenderer: {
-                on: jest.fn(),
                 off: jest.fn(),
+                on: jest.fn(),
                 send: jest.fn()
             }
         };
@@ -55,14 +56,14 @@ describe('GpgKeyStore', () => {
             { id: '2', name: 'two', email: 'two@dev.local' }
         ]);
         expect(store.gpgKeys.get('1')).toEqual({
+            email: 'one@dev.local',
             id: '1',
-            name: 'one',
-            email: 'one@dev.local'
+            name: 'one'
         });
         expect(store.gpgKeys.get('2')).toEqual({
+            email: 'two@dev.local',
             id: '2',
-            name: 'two',
-            email: 'two@dev.local'
+            name: 'two'
         });
         expect(store.gpgKeys.size).toBe(2);
     });
@@ -80,8 +81,8 @@ describe('GpgKeyStore', () => {
 
     it('correctly sorts keys with duplicate names', () => {
         store = createStore({
-            def: { id: 'def', name: 'alpha', email: 'alpha@dev.local' },
-            abc: { id: 'abc', name: 'alpha', email: 'alpha@dev.local' }
+            abc: { id: 'abc', name: 'alpha', email: 'alpha@dev.local' },
+            def: { id: 'def', name: 'alpha', email: 'alpha@dev.local' }
         });
         expect(store.sortedKeys).toEqual([
             { id: 'abc', name: 'alpha', email: 'alpha@dev.local' },

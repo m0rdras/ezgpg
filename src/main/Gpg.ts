@@ -1,9 +1,9 @@
+import assert from 'assert';
 import {
     ChildProcessWithoutNullStreams,
     spawn,
     SpawnOptionsWithoutStdio
 } from 'child_process';
-import assert from 'assert';
 import debug from 'debug';
 
 const log = debug('ezgpg:gpg');
@@ -13,7 +13,7 @@ export class GpgError extends Error {
         super(message);
     }
 
-    toString() {
+    public toString() {
         return `${super.toString()} [Code: ${this.code}]`;
     }
 }
@@ -26,12 +26,18 @@ type SpawnFunction = (
 const defaultSpawnFn: SpawnFunction = spawn;
 
 export default class Gpg {
+    public static isEncrypted(text: string) {
+        return (
+            text.search('-----BEGIN PGP MESSAGE-----') > -1 &&
+            text.search('-----END PGP MESSAGE-----\n') > -1
+        );
+    }
     constructor(
         public gpgPath: string = 'gpg',
         private spawnFn: SpawnFunction = defaultSpawnFn
     ) {}
 
-    spawn(args?: readonly string[], input?: string): Promise<string> {
+    public spawn(args?: readonly string[], input?: string): Promise<string> {
         log('Spawning GPG with args %o', args);
         return new Promise(async (resolve, reject) => {
             let stdout = '';
@@ -65,7 +71,7 @@ export default class Gpg {
         });
     }
 
-    async getPublicKeys() {
+    public async getPublicKeys() {
         log('Getting pub keys');
         return (await this.spawn(['-k']))
             .trim()
@@ -89,23 +95,16 @@ export default class Gpg {
             });
     }
 
-    async encrypt(input: string, recipients: readonly string[]) {
+    public async encrypt(input: string, recipients: readonly string[]) {
         const recipientArgs = recipients.map(id => ['-r', id]).flat();
 
-        return await this.spawn(
+        return this.spawn(
             ['-e', '-a', '--trust-model', 'always'].concat(recipientArgs),
             input
         );
     }
 
-    async decrypt(input: string) {
-        return await this.spawn(['-d', '-a', '--trust-model', 'always'], input);
-    }
-
-    static isEncrypted(text: string) {
-        return (
-            text.search('-----BEGIN PGP MESSAGE-----') > -1 &&
-            text.search('-----END PGP MESSAGE-----\n') > -1
-        );
+    public async decrypt(input: string) {
+        return this.spawn(['-d', '-a', '--trust-model', 'always'], input);
     }
 }

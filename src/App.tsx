@@ -1,10 +1,10 @@
 import debug from 'debug';
+import { onSnapshot } from 'mobx-state-tree';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import Root from './components/Root';
 import createRootStore from './stores/RootStore';
-import { onSnapshot } from 'mobx-state-tree';
 
 const log = debug('ezgpg:main');
 

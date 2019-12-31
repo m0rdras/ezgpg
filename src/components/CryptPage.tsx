@@ -1,16 +1,16 @@
-import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Grid, Form, GridRow } from 'semantic-ui-react';
+import React from 'react';
+import { Form, Grid, GridRow } from 'semantic-ui-react';
 
+import { IRootStore } from '../stores/RootStore';
 import CryptTextArea from './CryptTextArea';
 import RecipientDropdown from './RecipientDropdown';
-import { IRootStore } from '../stores/RootStore';
 
-type CryptPageProps = {
+interface ICryptPageProps {
     store: IRootStore;
-};
+}
 
-const CryptPage: React.FC<CryptPageProps> = observer(({ store }) => {
+const CryptPage: React.FC<ICryptPageProps> = observer(({ store }) => {
     const { output, input } = store.cryptStore;
 
     return (

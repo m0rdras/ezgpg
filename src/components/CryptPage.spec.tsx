@@ -1,7 +1,8 @@
-import React from 'react';
 import { shallow } from 'enzyme';
-import CryptPage from './CryptPage';
+import React from 'react';
+
 import { RootStore } from '../stores/RootStore';
+import CryptPage from './CryptPage';
 import CryptTextArea from './CryptTextArea';
 import RecipientDropdown from './RecipientDropdown';
 
@@ -9,10 +10,6 @@ describe('CryptPage', () => {
     const ipcRendererMock = { on: jest.fn(), send: jest.fn() };
     const store = RootStore.create(
         {
-            gpgKeyStore: {
-                gpgKeys: {},
-                selectedKeys: []
-            },
             cryptStore: {
                 input: {
                     val: ''
@@ -21,6 +18,10 @@ describe('CryptPage', () => {
                     val: ''
                 },
                 pending: false
+            },
+            gpgKeyStore: {
+                gpgKeys: {},
+                selectedKeys: []
             }
         },
         {

@@ -1,7 +1,7 @@
-import Main from './Main';
-import { ipcMain } from 'electron';
+import { ipcMain, IpcMain, IpcMainEvent } from 'electron';
+
 import { Events } from '../Constants';
-import { IpcMain, IpcMainEvent } from 'electron';
+import Main from './Main';
 
 type OnMockFn = (
     channel: string,

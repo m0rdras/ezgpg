@@ -1,8 +1,9 @@
-import React from 'react';
 import { shallow } from 'enzyme';
-import CryptTextArea from './CryptTextArea';
-import { IOText } from '../stores/CryptStore';
+import React from 'react';
 import { TextArea } from 'semantic-ui-react';
+
+import { IOText } from '../stores/CryptStore';
+import CryptTextArea from './CryptTextArea';
 
 describe('CryptTextArea', () => {
     it('should render with unencrypted text', () => {

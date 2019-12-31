@@ -1,14 +1,14 @@
-import React from 'react';
 import { observer } from 'mobx-react-lite';
+import React from 'react';
 import { Dropdown, Form } from 'semantic-ui-react';
 
 import { IGpgKeyStore } from '../stores/GpgKeyStore';
 
-type RecipientDropdownProps = {
+interface IRecipientDropdownProps {
     keyStore: IGpgKeyStore;
-};
+}
 
-const RecipientDropdown: React.FC<RecipientDropdownProps> = observer(
+const RecipientDropdown: React.FC<IRecipientDropdownProps> = observer(
     ({ keyStore }) => {
         const recipients = keyStore.sortedKeys.map(el => ({
             key: el.id,

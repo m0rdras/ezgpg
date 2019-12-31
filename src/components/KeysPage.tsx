@@ -1,13 +1,14 @@
-import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { IGpgKeyStore } from '../stores/GpgKeyStore';
+import React from 'react';
 import { Container, Table } from 'semantic-ui-react';
 
-type KeysPageProps = {
-    keyStore: IGpgKeyStore;
-};
+import { IGpgKeyStore } from '../stores/GpgKeyStore';
 
-const KeysPage: React.FC<KeysPageProps> = observer(({ keyStore }) => {
+interface IKeysPageProps {
+    keyStore: IGpgKeyStore;
+}
+
+const KeysPage: React.FC<IKeysPageProps> = observer(({ keyStore }) => {
     const rows = keyStore.sortedKeys.map(key => (
         <Table.Row key={key.id}>
             <Table.Cell>{key.id}</Table.Cell>
