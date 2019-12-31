@@ -1,4 +1,4 @@
-# ezGPG
+# ezGPG ![](https://github.com/m0rdras/ezgpg/workflows/CI/badge.svg)
 
 A small Electron app for easy encryption/decryption of text messages via GnuPG.
 
