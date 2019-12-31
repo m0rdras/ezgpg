@@ -3,15 +3,14 @@ name: CI
 on: [push]
 
 jobs:
-  build:
+    build:
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v1
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+        steps:
+            - uses: actions/checkout@v1
+            - uses: borales/actions-yarn@v2.1.0
+              with:
+                  cmd: install # will run `yarn install` command
+            - uses: borales/actions-yarn@v2.1.0
+              with:
+                  cmd: test # will run `yarn test` command
