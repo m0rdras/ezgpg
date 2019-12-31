@@ -1,4 +1,4 @@
-# ezGPG ![](https://github.com/m0rdras/ezgpg/workflows/CI/badge.svg)
+# ezGPG ![](https://github.com/m0rdras/ezgpg/workflows/CI/badge.svg) [![codecov](https://codecov.io/gh/m0rdras/ezgpg/branch/master/graph/badge.svg)](https://codecov.io/gh/m0rdras/ezgpg)
 
 A small Electron app for easy encryption/decryption of text messages via [GnuPG](https://www.gnupg.org).
 
