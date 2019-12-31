@@ -1,0 +1,19 @@
+{
+    "presets": [
+        "@babel/typescript",
+        "@babel/preset-react",
+        [
+            "@babel/preset-env",
+            {
+                "targets": {
+                    "electron": "7.1.2"
+                }
+            }
+        ]
+    ],
+    "plugins": [
+        "react-hot-loader/babel",
+        "@babel/plugin-proposal-optional-chaining",
+        "@babel/plugin-proposal-nullish-coalescing-operator"
+    ]
+}

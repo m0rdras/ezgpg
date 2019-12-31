@@ -1,0 +1,17 @@
+@import '~semantic-ui-css/semantic.min.css';
+
+body {
+    height: 100%;
+}
+
+#root {
+    height: 100%;
+}
+
+.crypttextarea.encrypted {
+    color: DarkRed !important;
+}
+
+.crypttextarea.decrypted {
+    color: ForestGreen !important;
+}
