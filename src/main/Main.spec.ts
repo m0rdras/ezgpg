@@ -15,11 +15,18 @@ describe('Main', () => {
     let mockGpg: Gpg;
     let mockEvent: Electron.IpcMainEvent;
     let main: Main;
+    let mockReply: jest.MockContext<
+        (channel: string, ...args: any) => void,
+        any[]
+    >;
 
     beforeEach(() => {
         mockGpg = new Gpg();
-        mockEvent = { reply: jest.fn() } as any;
+        const reply = jest.fn();
+        mockReply = reply.mock as any;
+        mockEvent = { reply } as any;
         main = new Main(mockGpg);
+        (mockGpg as any).__setEncrypted(false);
     });
 
     it('should setup ipc events', () => {
@@ -39,7 +46,7 @@ describe('Main', () => {
 
             await main.onRequestPubKeys(mockEvent);
 
-            const mockReply = (mockEvent.reply as jest.Mock).mock;
+            // const mockReply = (mockEvent.reply as jest.Mock).mock;
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.PUBKEYS_RESULT,
@@ -52,7 +59,6 @@ describe('Main', () => {
                 throw new GpgError(2, 'error');
             });
             await main.onRequestPubKeys(mockEvent);
-            const mockReply = (mockEvent.reply as jest.Mock).mock;
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([Events.PUBKEYS_RESULT, []]);
         });
@@ -67,7 +73,6 @@ describe('Main', () => {
                 recipients: ['alpha'],
                 text: 'foobar'
             });
-            const mockReply = (mockEvent.reply as jest.Mock).mock;
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
@@ -84,11 +89,34 @@ describe('Main', () => {
                 recipients: [],
                 text: 'foobar'
             });
-            const mockReply = (mockEvent.reply as jest.Mock).mock;
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
                 { encrypted: false, text: 'DECRYPTED' }
+            ]);
+        });
+
+        it('handles empty text', async () => {
+            await main.onRequestCrypt(mockEvent, {
+                recipients: ['alpha'],
+                text: ''
+            });
+            expect(mockReply.calls).toHaveLength(1);
+            expect(mockReply.calls[0]).toEqual([
+                Events.CRYPT_RESULT,
+                { encrypted: false, text: '' }
+            ]);
+        });
+
+        it('handles empty recipient list', async () => {
+            await main.onRequestCrypt(mockEvent, {
+                recipients: [],
+                text: 'encrypt me plz!'
+            });
+            expect(mockReply.calls).toHaveLength(1);
+            expect(mockReply.calls[0]).toEqual([
+                Events.CRYPT_RESULT,
+                { encrypted: false, text: '' }
             ]);
         });
     });

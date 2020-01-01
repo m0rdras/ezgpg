@@ -48,7 +48,7 @@ export default class Main {
     setup() {
         log('Starting up main process');
         ipcMain.on(Events.PUBKEYS, event => this.onRequestPubKeys(event));
-        ipcMain.on(Events.CRYPT, async (event, data) =>
+        ipcMain.on(Events.CRYPT, (event, data) =>
             this.onRequestCrypt(event, data)
         );
     }
