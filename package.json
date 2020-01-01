@@ -17,8 +17,8 @@
         "gpg",
         "crypt"
     ],
-    "author": "mordras",
-    "license": "MIT",
+    "author": "m0rdras",
+    "license": "Apache-2.0",
     "config": {
         "forge": {
             "packagerConfig": {},
@@ -26,7 +26,7 @@
                 {
                     "name": "@electron-forge/maker-squirrel",
                     "config": {
-                        "name": "ezgpg"
+                        "name": "ezGPG"
                     }
                 },
                 {
