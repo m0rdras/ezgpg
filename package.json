@@ -17,8 +17,14 @@
         "gpg",
         "crypt"
     ],
-    "author": "m0rdras",
+    "author": "m0rdras <m0rdras@users.noreply.github.com>",
     "license": "Apache-2.0",
+    "repository": "github:m0rdras/ezgpg",
+    "os": [
+        "darwin",
+        "linux",
+        "win32"
+    ],
     "config": {
         "forge": {
             "packagerConfig": {},
