@@ -4,16 +4,14 @@ A small Electron app for easy encryption/decryption of text messages via [GnuPG]
 
 # Getting Started
 
-No packaging is provided. The project has been bootstrapped via [Electron Forge](https://www.electronforge.io) though, so packaging should be easy.
+At the moment there is only a macOS package. Contribution builds for win32/Linux would be much appreciated. The project has been bootstrapped via [Electron Forge](https://www.electronforge.io), so packaging should be easy.
 
-Install dependencies with [`yarn`](https://yarnpkg.com/) or `npm` and start with
+# Prerequisites
 
-```bash
-yarn start
-```
+You will need to have GnuPG installed. Right now ezgpg is looking for a `gpg` executable in `/usr/local/bin` and `/usr/bin` in that order. Offering an easy way to configure the gpg path is planned.
 
-Run tests
+# Running from Source
 
-```bash
-yarn test
-```
+Install dependencies with [`yarn`](https://yarnpkg.com/) or `npm` and start with `yarn dev` or `yarn start`.
+
+Run tests with `yarn test`.
