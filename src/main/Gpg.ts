@@ -1,10 +1,8 @@
 import assert from 'assert';
-import {
-    ChildProcessWithoutNullStreams,
-    spawn,
-    SpawnOptionsWithoutStdio
-} from 'child_process';
+import { ChildProcess, SpawnOptions } from 'child_process';
+import spawn from 'cross-spawn';
 import debug from 'debug';
+import fs from 'fs';
 
 const log = debug('ezgpg:gpg');
 
@@ -21,8 +19,8 @@ export class GpgError extends Error {
 type SpawnFunction = (
     command: string,
     args?: ReadonlyArray<string>,
-    options?: SpawnOptionsWithoutStdio
-) => ChildProcessWithoutNullStreams;
+    options?: SpawnOptions
+) => ChildProcess;
 const defaultSpawnFn: SpawnFunction = spawn;
 
 export default class Gpg {
@@ -33,9 +31,19 @@ export default class Gpg {
         );
     }
     constructor(
-        public gpgPath: string = 'gpg',
+        public gpgPath: string = '',
         private spawnFn: SpawnFunction = defaultSpawnFn
-    ) {}
+    ) {
+        if (this.gpgPath.length === 0) {
+            for (const pathOption of ['/usr/local/bin/gpg', '/usr/bin/gpg']) {
+                if (fs.existsSync(pathOption)) {
+                    this.gpgPath = pathOption;
+                    log('Using detected path "%s" for gpg', pathOption);
+                    break;
+                }
+            }
+        }
+    }
 
     public spawn(args?: readonly string[], input?: string): Promise<string> {
         log('Spawning GPG with args %o', args);
@@ -43,30 +51,38 @@ export default class Gpg {
             let stdout = '';
             let stderr = '';
 
-            const child = this.spawnFn(
-                this.gpgPath,
-                ['--batch'].concat(args ?? [])
-            );
+            try {
+                const child = this.spawnFn(
+                    this.gpgPath,
+                    ['--batch'].concat(args ?? [])
+                );
 
-            child.stderr.on('data', data => {
-                stderr += data;
-            });
-
-            child.on('close', code => {
-                log('closing');
-                if (code !== 0) {
-                    reject(new GpgError(code, stderr));
-                } else {
-                    resolve(stdout);
+                if (
+                    child.stderr === null ||
+                    child.stdin === null ||
+                    child.stdout === null
+                ) {
+                    return reject(new Error('Error while spawning GPG'));
                 }
-            });
 
-            if (input) {
-                child.stdin.end(input);
-            }
+                child.stderr.on('data', data => (stderr += data));
 
-            for await (const data of child.stdout) {
-                stdout += data;
+                child.on('close', code =>
+                    code === 0
+                        ? resolve(stdout)
+                        : reject(new GpgError(code, stderr))
+                );
+
+                if (input) {
+                    child.stdin.end(input);
+                }
+
+                for await (const data of child.stdout) {
+                    stdout += data;
+                }
+            } catch (err) {
+                log('Unknown error while spawning GPG: %O', err);
+                reject(err);
             }
         });
     }

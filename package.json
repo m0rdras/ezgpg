@@ -1,12 +1,12 @@
 {
     "name": "ezgpg",
     "productName": "ezgpg",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Simple UI for GPG",
     "main": ".webpack/main",
     "scripts": {
         "start": "electron-forge start",
-        "dev": "DEBUG=ezgpg:* electron-forge start",
+        "dev": "NODE_ENV=development DEBUG=ezgpg:* electron-forge start",
         "package": "electron-forge package",
         "make": "electron-forge make",
         "publish": "electron-forge publish",
@@ -32,7 +32,7 @@
                 {
                     "name": "@electron-forge/maker-squirrel",
                     "config": {
-                        "name": "ezGPG"
+                        "name": "ezgpg"
                     }
                 },
                 {
@@ -67,6 +67,18 @@
                         }
                     }
                 ]
+            ],
+            "publishers": [
+                {
+                    "name": "@electron-forge/publisher-github",
+                    "config": {
+                        "repository": {
+                            "owner": "m0rdras",
+                            "name": "ezgpg"
+                        },
+                        "prerelease": true
+                    }
+                }
             ]
         }
     },
@@ -77,15 +89,17 @@
         "@babel/preset-env": "^7.7.7",
         "@babel/preset-react": "^7.7.4",
         "@babel/preset-typescript": "^7.7.7",
-        "@electron-forge/cli": "6.0.0-beta.45",
-        "@electron-forge/maker-deb": "6.0.0-beta.45",
-        "@electron-forge/maker-rpm": "6.0.0-beta.45",
-        "@electron-forge/maker-squirrel": "6.0.0-beta.45",
-        "@electron-forge/maker-zip": "6.0.0-beta.45",
+        "@electron-forge/cli": "^6.0.0-beta.47",
+        "@electron-forge/maker-deb": "^6.0.0-beta.47",
+        "@electron-forge/maker-rpm": "^6.0.0-beta.47",
+        "@electron-forge/maker-squirrel": "^6.0.0-beta.47",
+        "@electron-forge/maker-zip": "^6.0.0-beta.47",
         "@electron-forge/plugin-webpack": "6.0.0-beta.45",
+        "@electron-forge/publisher-github": "^6.0.0-beta.47",
         "@hot-loader/react-dom": "^16.11.0",
         "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
         "@types/concat-stream": "^1.6.0",
+        "@types/cross-spawn": "^6.0.1",
         "@types/debug": "^4.1.5",
         "@types/enzyme": "^3.10.4",
         "@types/enzyme-adapter-react-16": "^1.0.5",
@@ -97,6 +111,7 @@
         "babel-jest": "^24.9.0",
         "babel-loader": "^8.0.6",
         "concat-stream": "^2.0.0",
+        "cross-spawn": "^7.0.1",
         "css-loader": "^3.0.0",
         "debug": "^4.1.1",
         "electron": "7.1.7",

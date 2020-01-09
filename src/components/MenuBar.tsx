@@ -10,7 +10,7 @@ const MenuBar: React.FC = () => (
     <Menu attached='top' pointing style={{ marginBottom: '2em' }}>
         <Menu.Item>
             <Header>
-                <Icon name='key' /> ezGPG
+                <Icon name='key' /> ezgpg
             </Header>
         </Menu.Item>
         <Menu.Item as={MenuNavLink} to='/' name='home' />

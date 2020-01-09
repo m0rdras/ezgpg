@@ -31,8 +31,7 @@ const createWindow = async () => {
     // BrowserWindow.removeDevToolsExtension('React Developer Tools');
     // BrowserWindow.removeDevToolsExtension('MobX Developer Tools');
 
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 
     // Emitted when the window is closed.
     mainWindow.on('closed', () => {
