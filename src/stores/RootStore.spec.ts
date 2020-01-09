@@ -1,4 +1,5 @@
 import { ipcRenderer } from 'electron';
+import { destroy } from 'mobx-state-tree';
 
 import { Events } from '../Constants';
 import createRootStore, { RootStore } from './RootStore';
@@ -52,5 +53,10 @@ describe('RootStore', () => {
         const store = createRootStore(ipcRenderer);
         expect(store.gpgKeyStore).toBeDefined();
         expect(store.cryptStore).toBeDefined();
+    });
+
+    it('should be destructible', () => {
+        const store = createStore();
+        destroy(store);
     });
 });

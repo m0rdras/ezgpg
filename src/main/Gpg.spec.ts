@@ -69,6 +69,32 @@ describe('Gpg', () => {
         });
     });
 
+    describe('with execution problems', () => {
+        it('should reject when stdio is null', async () => {
+            const spawnFn = () =>
+                ({
+                    on: jest.fn(),
+                    stderr: null,
+                    stdin: null,
+                    stdout: null
+                } as any);
+            gpg = new Gpg('gpg', spawnFn);
+            const result = gpg.spawn();
+            await expect(result).rejects.toEqual(
+                new Error('Error while spawning GPG')
+            );
+        });
+
+        it('should reject when spawn throws', async () => {
+            const spawnFn = () => {
+                throw new Error('epic fail');
+            };
+            gpg = new Gpg('gpg', spawnFn);
+            const result = gpg.spawn();
+            await expect(result).rejects.toEqual(new Error('epic fail'));
+        });
+    });
+
     describe('with mocked spawn function', () => {
         let stdin = '';
         let exitCode = 0;
