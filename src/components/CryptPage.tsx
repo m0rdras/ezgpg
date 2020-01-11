@@ -7,11 +7,11 @@ import CryptTextArea from './CryptTextArea';
 import RecipientDropdown from './RecipientDropdown';
 
 interface ICryptPageProps {
-    store: IRootStore;
+    cryptStore: IRootStore;
 }
 
-const CryptPage: React.FC<ICryptPageProps> = observer(({ store }) => {
-    const { output, input } = store.cryptStore;
+const CryptPage: React.FC<ICryptPageProps> = observer(({ cryptStore }) => {
+    const { output, input } = cryptStore.cryptStore;
 
     return (
         <div>
@@ -19,7 +19,9 @@ const CryptPage: React.FC<ICryptPageProps> = observer(({ store }) => {
                 <Grid container>
                     <GridRow>
                         <Grid.Column width={16}>
-                            <RecipientDropdown keyStore={store.gpgKeyStore} />
+                            <RecipientDropdown
+                                keyStore={cryptStore.gpgKeyStore}
+                            />
                         </Grid.Column>
                     </GridRow>
                     <GridRow>

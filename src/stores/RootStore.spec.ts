@@ -30,6 +30,9 @@ describe('RootStore', () => {
                         }
                     },
                     selectedKeys: ['alpha']
+                },
+                settingsStore: {
+                    gpgPath: '/foo/bar/gpg'
                 }
             },
             {

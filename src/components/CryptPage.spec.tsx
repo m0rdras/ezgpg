@@ -22,6 +22,9 @@ describe('CryptPage', () => {
             gpgKeyStore: {
                 gpgKeys: {},
                 selectedKeys: []
+            },
+            settingsStore: {
+                gpgPath: '/foo/bar/gpg'
             }
         },
         {
@@ -29,7 +32,7 @@ describe('CryptPage', () => {
         }
     );
     it('should render', () => {
-        const wrapper = shallow(<CryptPage store={store} />);
+        const wrapper = shallow(<CryptPage cryptStore={store} />);
         expect(wrapper.find(RecipientDropdown)).toHaveLength(1);
         expect(wrapper.find(CryptTextArea)).toHaveLength(2);
     });

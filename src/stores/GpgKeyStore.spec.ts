@@ -28,7 +28,7 @@ describe('GpgKeyStore', () => {
             Events.PUBKEYS_RESULT
         );
         expect(deps.ipcRenderer.on.mock.calls[0][1]).toBe(
-            store.handleGpgKeyResponse
+            store.onGpgKeyResponse
         );
     });
 
@@ -39,7 +39,7 @@ describe('GpgKeyStore', () => {
             Events.PUBKEYS_RESULT
         );
         expect(deps.ipcRenderer.off.mock.calls[0][1]).toBe(
-            store.handleGpgKeyResponse
+            store.onGpgKeyResponse
         );
     });
 
@@ -51,10 +51,12 @@ describe('GpgKeyStore', () => {
 
     it('handles response correctly', () => {
         store = createStore();
-        store.handleGpgKeyResponse({} as Electron.IpcRendererEvent, [
-            { id: '1', name: 'one', email: 'one@dev.local' },
-            { id: '2', name: 'two', email: 'two@dev.local' }
-        ]);
+        store.onGpgKeyResponse({} as Electron.IpcRendererEvent, {
+            pubKeys: [
+                { id: '1', name: 'one', email: 'one@dev.local' },
+                { id: '2', name: 'two', email: 'two@dev.local' }
+            ]
+        });
         expect(store.gpgKeys.get('1')).toEqual({
             email: 'one@dev.local',
             id: '1',

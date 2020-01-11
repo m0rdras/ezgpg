@@ -36,27 +36,31 @@ export const GpgKeyStore = types
         afterCreate() {
             getEnv(self).ipcRenderer.on(
                 Events.PUBKEYS_RESULT,
-                this.handleGpgKeyResponse
+                this.onGpgKeyResponse
             );
         },
+
         beforeDestroy() {
             getEnv(self).ipcRenderer.off(
                 Events.PUBKEYS_RESULT,
-                this.handleGpgKeyResponse
+                this.onGpgKeyResponse
             );
         },
-        handleGpgKeyResponse(
+
+        onGpgKeyResponse(
             event: Electron.IpcRendererEvent,
-            result: IGpgKey[]
+            { pubKeys, error }: { pubKeys: IGpgKey[]; error?: Error }
         ) {
-            log('received %d pub keys: %O', result.length, result);
+            log('received %d pub keys: %O', pubKeys.length, pubKeys);
             self.gpgKeys.clear();
-            result.forEach(key => self.gpgKeys.put(key));
+            pubKeys.forEach(key => self.gpgKeys.put(key));
         },
+
         load() {
             log('requesting pub keys');
             getEnv(self).ipcRenderer.send(Events.PUBKEYS);
         },
+
         setSelectedKeys(names: string[]) {
             self.selectedKeys.clear();
             self.selectedKeys.push(

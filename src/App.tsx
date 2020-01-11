@@ -10,11 +10,14 @@ const log = debug('ezgpg:main');
 
 const rootStore = createRootStore();
 
-onSnapshot(rootStore, snapshot => {
-    log('New state snapshot: %O', snapshot);
-    // localStorage.setItem('snapshot', JSON.stringify(snapshot));
-});
+log('Created root store %O', rootStore);
 
-rootStore.gpgKeyStore.load();
+rootStore.load();
+
+if (process.env.NODE_ENV === 'development') {
+    onSnapshot(rootStore, snapshot => {
+        log('New state snapshot: %O', snapshot);
+    });
+}
 
 ReactDOM.render(<Root store={rootStore} />, document.getElementById('root'));

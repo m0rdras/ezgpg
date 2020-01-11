@@ -50,17 +50,21 @@ describe('Main', () => {
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.PUBKEYS_RESULT,
-                ['alpha', 'beta']
+                { pubKeys: ['alpha', 'beta'] }
             ]);
         });
 
         it('handles request for public keys when gpg errors', async () => {
+            const expectedError = new GpgError(2, 'error');
             (mockGpg.getPublicKeys as any).mockImplementation(async () => {
-                throw new GpgError(2, 'error');
+                throw expectedError;
             });
             await main.onRequestPubKeys(mockEvent);
             expect(mockReply.calls).toHaveLength(1);
-            expect(mockReply.calls[0]).toEqual([Events.PUBKEYS_RESULT, []]);
+            expect(mockReply.calls[0]).toEqual([
+                Events.PUBKEYS_RESULT,
+                { pubKeys: [], error: expectedError }
+            ]);
         });
     });
 

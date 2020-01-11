@@ -6,13 +6,15 @@ import { getEnv, Instance, SnapshotIn, types } from 'mobx-state-tree';
 import { Events } from '../Constants';
 import { CryptStore } from './CryptStore';
 import { GpgKeyStore } from './GpgKeyStore';
+import { SettingsStore } from './SettingsStore';
 
 const log = debug('ezgpg:rootStore');
 
 export const RootStore = types
     .model('RootStore', {
         cryptStore: CryptStore,
-        gpgKeyStore: GpgKeyStore
+        gpgKeyStore: GpgKeyStore,
+        settingsStore: SettingsStore
     })
     .actions(self => {
         let disposer: IReactionDisposer;
@@ -28,6 +30,10 @@ export const RootStore = types
         };
 
         return {
+            load() {
+                self.settingsStore.load();
+                self.gpgKeyStore.load();
+            },
             afterCreate() {
                 disposer = autorun(() => onInputChange());
             },
@@ -52,6 +58,9 @@ export default function createRootStore(ipc = ipcRenderer) {
         gpgKeyStore: {
             gpgKeys: {},
             selectedKeys: []
+        },
+        settingsStore: {
+            gpgPath: '/usr/local/bin/gpg'
         }
     };
     const deps = { ipcRenderer: ipc };

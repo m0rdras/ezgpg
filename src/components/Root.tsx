@@ -24,10 +24,10 @@ const Root: React.FC<IRootProps> = ({ store }) => {
                             <KeysPage keyStore={store.gpgKeyStore} />
                         </Route>
                         <Route path='/settings'>
-                            <SettingsPage />
+                            <SettingsPage settingsStore={store.settingsStore} />
                         </Route>
                         <Route exact path='/'>
-                            <CryptPage store={store} />
+                            <CryptPage cryptStore={store} />
                         </Route>
                     </Switch>
                 </Container>

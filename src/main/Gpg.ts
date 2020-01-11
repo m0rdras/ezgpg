@@ -73,6 +73,8 @@ export default class Gpg {
                         : reject(new GpgError(code, stderr))
                 );
 
+                child.on('error', reject);
+
                 if (input) {
                     child.stdin.end(input);
                 }
