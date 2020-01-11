@@ -1,11 +1,14 @@
 import debug from 'debug';
+import fs from 'fs';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState } from 'react';
-import { Button, Form } from 'semantic-ui-react';
+import React, { useState } from 'react';
+import { Button, Form, Message } from 'semantic-ui-react';
+
 import { ISettingsStore } from '../stores/SettingsStore';
 import PathInput from './PathInput';
 
 const log = debug('ezgpg:SettingsPage');
+const { access } = fs.promises;
 
 interface ISettingsStoreProps {
     settingsStore: ISettingsStore;
@@ -15,24 +18,39 @@ const SettingsPage: React.FC<ISettingsStoreProps> = observer(
     ({ settingsStore }) => {
         const [curGpgPath, setCurGpgPath] = useState(settingsStore.gpgPath);
         const [saveDisabled, setSaveDisabled] = useState(true);
+        const [curError, setCurError] = useState(null);
 
         const onSaveClick = () => {
             log('Saving current path %s', curGpgPath);
+            setSaveDisabled(true);
             settingsStore.setGpgPath(curGpgPath);
             settingsStore.save();
         };
 
-        useEffect(() => {
-            setSaveDisabled(curGpgPath === settingsStore.gpgPath);
-        });
+        const onChangePath = async (newPath: string) => {
+            setCurGpgPath(newPath);
+            try {
+                await access(newPath, fs.constants.X_OK);
+                setCurError(null);
+                setSaveDisabled(newPath === settingsStore.gpgPath);
+            } catch (err) {
+                setCurError(err.toString());
+                setSaveDisabled(true);
+            }
+        };
 
         return (
             <div>
-                <Form>
+                <Form error={curError !== null}>
                     <PathInput
-                        value={curGpgPath}
+                        path={curGpgPath}
                         label='Path to GnuPG executable'
-                        onChange={setCurGpgPath}
+                        onChange={onChangePath}
+                    />
+                    <Message
+                        error
+                        header='File not found or not executable'
+                        content={curError}
                     />
                     <Button
                         type='submit'

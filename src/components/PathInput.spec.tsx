@@ -9,7 +9,7 @@ const { dialog } = Electron.remote;
 describe('PathInput', () => {
     it('should render', () => {
         const wrapper = shallow(
-            <PathInput value='foo' label='bar' onChange={() => null} />
+            <PathInput path='foo' label='bar' onChange={() => null} />
         );
         const input = wrapper.find(Input);
         expect(input).toHaveLength(1);
@@ -21,7 +21,7 @@ describe('PathInput', () => {
     it('should call its change handler', () => {
         const onChange = jest.fn();
         const wrapper = shallow(
-            <PathInput value='/some/path' label='bar' onChange={onChange} />
+            <PathInput path='/some/path' label='bar' onChange={onChange} />
         );
 
         const changeEvent = { currentTarget: { value: '/foo' } };
@@ -35,7 +35,7 @@ describe('PathInput', () => {
 
         const onChange = jest.fn();
         const wrapper = mount(
-            <PathInput value='/some/path' label='bar' onChange={onChange} />
+            <PathInput path='/some/path' label='bar' onChange={onChange} />
         );
 
         const btn = wrapper.find('Button');

@@ -6,15 +6,16 @@ import { Button, Form, Input } from 'semantic-ui-react';
 const { dialog } = Electron.remote;
 
 interface IPathInputProps {
-    value: string;
+    path: string;
     label: string;
     onChange: (path: string) => void;
 }
 
 const PathInput: React.FC<IPathInputProps> = observer(
-    ({ value, label, onChange }) => {
+    ({ path, label, onChange }) => {
         const onSelectFileButtonClick = () => {
             const fileName = dialog.showOpenDialogSync({
+                defaultPath: path,
                 properties: ['openFile']
             });
             if (fileName?.length === 1) {
@@ -27,7 +28,7 @@ const PathInput: React.FC<IPathInputProps> = observer(
                 <label>{label}</label>
                 <div>
                     <Input
-                        value={value}
+                        value={path}
                         onChange={event => onChange(event.currentTarget.value)}
                         label={
                             <Button
