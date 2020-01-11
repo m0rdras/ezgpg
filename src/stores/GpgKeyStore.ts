@@ -51,8 +51,12 @@ export const GpgKeyStore = types
             event: Electron.IpcRendererEvent,
             { pubKeys, error }: { pubKeys: IGpgKey[]; error?: Error }
         ) {
-            log('received %d pub keys: %O', pubKeys.length, pubKeys);
             self.gpgKeys.clear();
+            if (error) {
+                log('Error while getting pub keys: %O', error);
+                return;
+            }
+            log('received %d pub keys: %O', pubKeys.length, pubKeys);
             pubKeys.forEach(key => self.gpgKeys.put(key));
         },
 

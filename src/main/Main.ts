@@ -3,7 +3,7 @@ import { ipcMain, IpcMainEvent } from 'electron';
 import ElectronStore from 'electron-store';
 
 import { Events, StoreKeys } from '../Constants';
-import { ISettings, ISettingsStore } from '../stores/SettingsStore';
+import { ISettings } from '../stores/SettingsStore';
 import Gpg from './Gpg';
 
 const log = debug('ezgpg:main');
