@@ -17,6 +17,7 @@ const SettingsPage: React.FC<ISettingsStoreProps> = observer(
         const [saveDisabled, setSaveDisabled] = useState(true);
 
         const onSaveClick = () => {
+            log('Saving current path %s', curGpgPath);
             settingsStore.setGpgPath(curGpgPath);
             settingsStore.save();
         };
