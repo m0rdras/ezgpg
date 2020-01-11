@@ -8,9 +8,16 @@ describe('SettingsPage', () => {
     let settingsStore: ISettingsStore;
 
     beforeEach(() => {
-        settingsStore = SettingsStore.create({
-            gpgPath: '/foo/bar/gpg'
-        });
+        settingsStore = SettingsStore.create(
+            {
+                gpgPath: '/foo/bar/gpg'
+            },
+            {
+                ipcRenderer: {
+                    on: jest.fn()
+                }
+            }
+        );
     });
 
     it('should render', () => {

@@ -13,4 +13,10 @@ const mock = jest.fn().mockImplementation(() => {
 });
 (mock as any).isEncrypted = jest.fn().mockImplementation(() => __encrypted);
 
-module.exports = mock;
+export const GpgError = jest
+    .fn()
+    .mockImplementation(
+        (code: number, msg: string) => new Error(`${msg} [Code: ${code}]`)
+    );
+
+export default mock;

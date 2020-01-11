@@ -62,7 +62,7 @@ export default class Main {
     }
 
     applySettings(settings: ISettings) {
-        if (settings) {
+        if (settings && settings?.gpgPath) {
             log('Applying settings: %O', settings);
             this.gpg.gpgPath = settings.gpgPath;
         }

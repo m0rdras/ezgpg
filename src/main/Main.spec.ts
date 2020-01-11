@@ -1,9 +1,11 @@
 import { ipcMain, IpcMain, IpcMainEvent } from 'electron';
+import ElectronStore from 'electron-store';
 
-import { Events } from '../Constants';
+import { Events, StoreKeys } from '../Constants';
 import Gpg, { GpgError } from './Gpg';
 import Main from './Main';
 
+// jest.mock('electron-store');
 jest.mock('./Gpg');
 
 type OnMockFn = (
@@ -14,6 +16,8 @@ type OnMockFn = (
 describe('Main', () => {
     let mockGpg: Gpg;
     let mockEvent: Electron.IpcMainEvent;
+    let mockStore: ElectronStore;
+
     let main: Main;
     let mockReply: jest.MockContext<
         (channel: string, ...args: any) => void,
@@ -25,7 +29,11 @@ describe('Main', () => {
         const reply = jest.fn();
         mockReply = reply.mock as any;
         mockEvent = { reply } as any;
-        main = new Main(mockGpg);
+        mockStore = {
+            get: jest.fn(),
+            set: jest.fn()
+        } as any;
+        main = new Main(mockGpg, mockStore);
         (mockGpg as any).__setEncrypted(false);
     });
 
@@ -46,7 +54,6 @@ describe('Main', () => {
 
             await main.onRequestPubKeys(mockEvent);
 
-            // const mockReply = (mockEvent.reply as jest.Mock).mock;
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.PUBKEYS_RESULT,
@@ -122,6 +129,34 @@ describe('Main', () => {
                 Events.CRYPT_RESULT,
                 { encrypted: false, text: '' }
             ]);
+        });
+    });
+
+    describe('with settings', () => {
+        it('loads from store', () => {
+            (mockStore.get as any).mockReturnValue('settings');
+            main.onLoadSettings(mockEvent);
+            expect((mockStore.get as any).mock.calls[0][0]).toEqual(
+                StoreKeys.SETTINGS
+            );
+            expect((mockEvent.reply as any).mock.calls[0]).toEqual([
+                Events.LOAD_SETTINGS_RESULT,
+                'settings'
+            ]);
+        });
+        it('saves to store and applies settings', () => {
+            const settings = { gpgPath: '/foo' };
+            main.onSaveSettings(settings);
+            expect((mockStore.set as any).mock.calls[0]).toEqual([
+                StoreKeys.SETTINGS,
+                settings
+            ]);
+            expect(mockGpg.gpgPath).toEqual(settings.gpgPath);
+        });
+        it('does not try to apply empty settings', () => {
+            const gpgPath = (mockGpg.gpgPath = '/foo');
+            main.applySettings(undefined as any);
+            expect(mockGpg.gpgPath).toEqual(gpgPath);
         });
     });
 });

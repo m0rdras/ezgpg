@@ -128,17 +128,16 @@ describe('Gpg', () => {
                 });
                 eventHandler = jest.fn(
                     (
-                        event: 'close',
+                        event: string,
                         listener: (code: number, signal: NodeJS.Signals) => void
                     ) => {
-                        closeHandler = listener;
+                        if (event === 'close') {
+                            closeHandler = listener;
+                        }
                     }
-                ) as (
-                    event: string,
-                    listener: (code: number, signal: NodeJS.Signals) => void
-                ) => void;
+                );
 
-                setTimeout(() => closeHandler?.(exitCode, 'SIGTERM'), 0);
+                setImmediate(() => closeHandler?.(exitCode, 'SIGTERM'));
 
                 return {
                     on: eventHandler,
