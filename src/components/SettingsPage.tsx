@@ -31,9 +31,7 @@ const SettingsPage: React.FC<ISettingsStoreProps> = observer(
                     <PathInput
                         value={curGpgPath}
                         label='Path to GnuPG executable'
-                        onChange={event =>
-                            setCurGpgPath(event.currentTarget.value)
-                        }
+                        onChange={setCurGpgPath}
                     />
                     <Button
                         type='submit'

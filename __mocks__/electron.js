@@ -10,7 +10,14 @@ const ipcMain = {
     send: jest.fn()
 };
 
+const remote = {
+    dialog: {
+        showOpenDialogSync: jest.fn()
+    }
+};
+
 module.exports = {
     ipcMain,
-    ipcRenderer
+    ipcRenderer,
+    remote
 };
