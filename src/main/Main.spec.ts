@@ -5,7 +5,6 @@ import { Events, StoreKeys } from '../Constants';
 import Gpg, { GpgError } from './Gpg';
 import Main from './Main';
 
-// jest.mock('electron-store');
 jest.mock('./Gpg');
 
 type OnMockFn = (
