@@ -15,7 +15,11 @@
         "trailing-comma": false,
         "max-classes-per-file": false,
         "member-access": false,
-        "no-submodule-imports": [true, "mobx-react-lite/optimizeForReactDom"]
+        "no-submodule-imports": [
+            true,
+            "mobx-react-lite/optimizeForReactDom",
+            "react-dom/test-utils"
+        ]
     },
     "rulesDirectory": []
 }
