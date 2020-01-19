@@ -15,15 +15,18 @@ let mainWindow: Electron.BrowserWindow | null;
 
 const createWindow = async () => {
     // Create the browser window.
-    mainWindow = new BrowserWindow({
-        height: 768,
-        width: 1024,
-        // tslint:disable-next-line:object-literal-sort-keys
-        webPreferences: {
-            nodeIntegration: true
+    mainWindow = new BrowserWindow(
+        // tslint:disable:object-literal-sort-keys
+        {
+            height: 768,
+            width: 1024,
+            title: 'ezgpg',
+            webPreferences: {
+                nodeIntegration: true
+            }
         }
-        // titleBarStyle: 'hidden'
-    });
+        // tslint:enable:object-literal-sort-keys
+    );
 
     // and load the index.html of the app.
     await mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
