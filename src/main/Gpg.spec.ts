@@ -38,34 +38,42 @@ deadbeef42
 describe('Gpg', () => {
     let gpg: Gpg;
 
-    describe('constructor', () => {
+    describe('detection of gpg executable', () => {
         const existsMock = fs.existsSync as jest.Mock;
+        const DEFAULT_PATHS = ['/usr/local/bin/gpg', '/usr/bin/gpg'];
+
         beforeEach(() => {
             existsMock.mockReset();
+            gpg = new Gpg();
         });
 
         it('tries to find a gpg path', () => {
             existsMock.mockReturnValueOnce(true);
-            gpg = new Gpg();
+
+            const detectedPath = gpg.detectExecutablePath();
 
             expect(existsMock.mock.calls.length).toBe(1);
-            expect(existsMock.mock.calls[0][0]).toEqual('/usr/local/bin/gpg');
+            expect(existsMock.mock.calls[0][0]).toEqual(DEFAULT_PATHS[0]);
+            expect(detectedPath).toEqual(DEFAULT_PATHS[0]);
         });
 
         it('continues to find a gpg path when first guess fails', () => {
             existsMock.mockReturnValueOnce(false).mockReturnValueOnce(true);
-            gpg = new Gpg();
+
+            const detectedPath = gpg.detectExecutablePath();
 
             expect(existsMock.mock.calls.length).toBe(2);
-            expect(existsMock.mock.calls[0][0]).toEqual('/usr/local/bin/gpg');
-            expect(existsMock.mock.calls[1][0]).toEqual('/usr/bin/gpg');
+            expect(existsMock.mock.calls[0][0]).toEqual(DEFAULT_PATHS[0]);
+            expect(existsMock.mock.calls[1][0]).toEqual(DEFAULT_PATHS[1]);
+            expect(detectedPath).toEqual(DEFAULT_PATHS[1]);
         });
 
         it('leaves its gpg path empty if not found without erroring out', () => {
             existsMock.mockReturnValue(false);
-            gpg = new Gpg();
 
-            expect(gpg.gpgPath).toEqual('');
+            const detectedPath = gpg.detectExecutablePath();
+
+            expect(detectedPath).toBeNull();
         });
     });
 

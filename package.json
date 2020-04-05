@@ -11,7 +11,7 @@
         "make": "electron-forge make",
         "publish": "electron-forge publish",
         "lint": "tslint -c tslint.json -p tsconfig.json",
-        "test": "jest"
+        "test": "DEBUG=ezgpg:* jest"
     },
     "keywords": [
         "gpg",

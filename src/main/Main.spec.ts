@@ -14,8 +14,9 @@ type OnMockFn = (
 
 describe('Main', () => {
     let mockGpg: Gpg;
-    let mockEvent: Electron.IpcMainEvent;
+    let mockEvent: IpcMainEvent;
     let mockStore: ElectronStore;
+    let mockSettings: { [key: string]: string };
 
     let main: Main;
     let mockReply: jest.MockContext<
@@ -28,17 +29,20 @@ describe('Main', () => {
         const reply = jest.fn();
         mockReply = reply.mock as any;
         mockEvent = { reply } as any;
+        mockSettings = {};
         mockStore = {
-            get: jest.fn(),
-            set: jest.fn()
+            get: jest.fn().mockImplementation(() => mockSettings),
+            set: jest
+                .fn()
+                .mockImplementation((key, val) => (mockSettings = val))
         } as any;
-        main = new Main(mockGpg, mockStore);
+        main = Main.setup(mockGpg, mockStore);
         (mockGpg as any).__setEncrypted(false);
     });
 
     it('should setup ipc events', () => {
         const onMock = (ipcMain.on as jest.MockedFunction<OnMockFn>).mock;
-        main.setup();
+
         expect(onMock.calls[0][0]).toEqual(Events.PUBKEYS);
         expect(onMock.calls[0][1]).toBeInstanceOf(Function);
         expect(onMock.calls[1][0]).toEqual(Events.CRYPT);
@@ -65,7 +69,9 @@ describe('Main', () => {
             (mockGpg.getPublicKeys as any).mockImplementation(async () => {
                 throw expectedError;
             });
+
             await main.onRequestPubKeys(mockEvent);
+
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.PUBKEYS_RESULT,
@@ -79,10 +85,12 @@ describe('Main', () => {
             (mockGpg.encrypt as any).mockImplementation(async () => {
                 return Promise.resolve('ENCRYPTED');
             });
+
             await main.onRequestCrypt(mockEvent, {
                 recipients: ['alpha'],
                 text: 'foobar'
             });
+
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
@@ -95,10 +103,12 @@ describe('Main', () => {
             (mockGpg.decrypt as any).mockImplementation(async () => {
                 return Promise.resolve('DECRYPTED');
             });
+
             await main.onRequestCrypt(mockEvent, {
                 recipients: [],
                 text: 'foobar'
             });
+
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
@@ -111,6 +121,7 @@ describe('Main', () => {
                 recipients: ['alpha'],
                 text: ''
             });
+
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
@@ -123,6 +134,7 @@ describe('Main', () => {
                 recipients: [],
                 text: 'encrypt me plz!'
             });
+
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
@@ -133,28 +145,32 @@ describe('Main', () => {
 
     describe('with settings', () => {
         it('loads from store', () => {
-            (mockStore.get as any).mockReturnValue('settings');
+            (mockStore.get as jest.Mock).mockReturnValue('settings');
+
             main.onLoadSettings(mockEvent);
-            expect((mockStore.get as any).mock.calls[0][0]).toEqual(
+
+            expect((mockStore.get as jest.Mock).mock.calls[0][0]).toEqual(
                 StoreKeys.SETTINGS
             );
-            expect((mockEvent.reply as any).mock.calls[0]).toEqual([
+            expect((mockEvent.reply as jest.Mock).mock.calls[0]).toEqual([
                 Events.LOAD_SETTINGS_RESULT,
                 'settings'
             ]);
         });
         it('saves to store and applies settings', () => {
-            const settings = { gpgPath: '/foo' };
-            main.onSaveSettings(settings);
-            expect((mockStore.set as any).mock.calls[0]).toEqual([
-                StoreKeys.SETTINGS,
-                settings
-            ]);
-            expect(mockGpg.gpgPath).toEqual(settings.gpgPath);
+            const settings = { gpgPath: __filename };
+            (mockGpg.setExecutablePath as jest.Mock).mockReturnValue(true);
+
+            main.onSaveSettings(mockEvent, settings);
+
+            expect(mockSettings).toEqual(settings);
+            expect(mockGpg.setExecutablePath).toHaveBeenCalledWith(__filename);
         });
         it('does not try to apply empty settings', () => {
             const gpgPath = (mockGpg.gpgPath = '/foo');
+
             main.applySettings(undefined as any);
+
             expect(mockGpg.gpgPath).toEqual(gpgPath);
         });
     });

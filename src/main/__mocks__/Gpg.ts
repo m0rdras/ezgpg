@@ -3,8 +3,10 @@ let __encrypted = false;
 const mock = jest.fn().mockImplementation(() => {
     return {
         decrypt: jest.fn(),
+        detectExecutablePath: jest.fn(),
         encrypt: jest.fn(),
         getPublicKeys: jest.fn(),
+        setExecutablePath: jest.fn(),
         // tslint:disable-next-line:object-literal-sort-keys
         __setEncrypted: (encrypted: boolean) => {
             __encrypted = encrypted;

@@ -14,6 +14,38 @@ export interface IRequestCryptData {
 }
 
 export default class Main {
+    static initGpgPath(gpg: Gpg, store: ElectronStore) {
+        const settings = store.get(StoreKeys.SETTINGS, {});
+        if (settings?.gpgPath) {
+            if (!gpg.setExecutablePath(settings.gpgPath)) {
+                settings.gpgPath = gpg.detectExecutablePath();
+            }
+        } else {
+            settings.gpgPath = gpg.detectExecutablePath();
+        }
+        store.set(StoreKeys.SETTINGS, settings);
+        return settings;
+    }
+
+    static setup(gpg = new Gpg(), store = new ElectronStore()): Main {
+        log('Starting up main process');
+
+        this.initGpgPath(gpg, store);
+
+        const main = new Main(gpg, store);
+
+        ipcMain.on(Events.PUBKEYS, event => main.onRequestPubKeys(event));
+        ipcMain.on(Events.CRYPT, (event, data) =>
+            main.onRequestCrypt(event, data)
+        );
+        ipcMain.on(Events.LOAD_SETTINGS, event => main.onLoadSettings(event));
+        ipcMain.on(Events.SAVE_SETTINGS, (event, data) =>
+            main.onSaveSettings(event, data)
+        );
+
+        return main;
+    }
+
     constructor(
         private readonly gpg = new Gpg(),
         private readonly store: ElectronStore = new ElectronStore()
@@ -56,30 +88,31 @@ export default class Main {
         event.reply(Events.LOAD_SETTINGS_RESULT, settings);
     }
 
-    onSaveSettings(settings: ISettings) {
-        this.store.set(StoreKeys.SETTINGS, settings);
-        this.applySettings(settings);
-    }
-
-    applySettings(settings: ISettings) {
-        if (settings && settings?.gpgPath) {
-            log('Applying settings: %O', settings);
-            this.gpg.gpgPath = settings.gpgPath;
+    onSaveSettings(event: IpcMainEvent, settings: ISettings) {
+        try {
+            this.applySettings(settings);
+            log('saving', settings);
+            this.store.set(StoreKeys.SETTINGS, settings);
+            log('Successfully saved setings: %O', settings);
+            event.reply(Events.SAVE_SETTINGS_RESULT, { settings });
+        } catch (error) {
+            const curSettings = this.store.get(StoreKeys.SETTINGS);
+            event.reply(Events.SAVE_SETTINGS_RESULT, {
+                error,
+                settings: curSettings
+            });
         }
     }
 
-    setup() {
-        log('Starting up main process');
-
-        this.applySettings(this.store.get(StoreKeys.SETTINGS));
-
-        ipcMain.on(Events.PUBKEYS, event => this.onRequestPubKeys(event));
-        ipcMain.on(Events.CRYPT, (event, data) =>
-            this.onRequestCrypt(event, data)
-        );
-        ipcMain.on(Events.LOAD_SETTINGS, event => this.onLoadSettings(event));
-        ipcMain.on(Events.SAVE_SETTINGS, (event, data) =>
-            this.onSaveSettings(data)
-        );
+    applySettings(settings: ISettings) {
+        if (settings?.gpgPath) {
+            log('Applying settings: %O', settings);
+            if (!this.gpg.setExecutablePath(settings.gpgPath)) {
+                log('Could not set GPG path to %s', settings.gpgPath);
+                throw new Error(
+                    `Could not set executable path to ${settings.gpgPath}`
+                );
+            }
+        }
     }
 }

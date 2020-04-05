@@ -33,20 +33,33 @@ export default class Gpg {
     constructor(
         public gpgPath: string = '',
         private spawnFn: SpawnFunction = defaultSpawnFn
-    ) {
-        if (this.gpgPath.length === 0) {
-            for (const pathOption of ['/usr/local/bin/gpg', '/usr/bin/gpg']) {
-                if (fs.existsSync(pathOption)) {
-                    this.gpgPath = pathOption;
-                    log('Using detected path "%s" for gpg', pathOption);
-                    break;
-                }
+    ) {}
+
+    public detectExecutablePath(): string | null {
+        for (const pathOption of ['/usr/local/bin/gpg', '/usr/bin/gpg']) {
+            if (this.setExecutablePath(pathOption)) {
+                log('Using detected path "%s" for gpg', pathOption);
+                return this.gpgPath;
             }
         }
+
+        return null;
+    }
+
+    public setExecutablePath(gpgPath: string): boolean {
+        if (fs.existsSync(gpgPath)) {
+            this.gpgPath = gpgPath;
+            log('Set gpg executable path to: "%s"', gpgPath);
+            return true;
+        }
+        return false;
     }
 
     public spawn(args?: readonly string[], input?: string): Promise<string> {
         log('Spawning GPG with args %o', args);
+        if (this.gpgPath.length === 0) {
+            return Promise.reject(new Error('gpg executable path not set'));
+        }
         return new Promise(async (resolve, reject) => {
             let stdout = '';
             let stderr = '';
