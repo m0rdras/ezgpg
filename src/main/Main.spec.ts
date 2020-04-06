@@ -1,4 +1,4 @@
-import { ipcMain, IpcMain, IpcMainEvent } from 'electron';
+import { ipcMain, IpcMainEvent } from 'electron';
 import ElectronStore from 'electron-store';
 
 import { Events, StoreKeys } from '../Constants';
@@ -6,11 +6,6 @@ import Gpg, { GpgError } from './Gpg';
 import Main from './Main';
 
 jest.mock('./Gpg');
-
-type OnMockFn = (
-    channel: string,
-    listener: (event: IpcMainEvent, ...args: any[]) => void
-) => IpcMain;
 
 describe('Main', () => {
     let mockGpg: Gpg;
@@ -34,14 +29,14 @@ describe('Main', () => {
             get: jest.fn().mockImplementation(() => mockSettings),
             set: jest
                 .fn()
-                .mockImplementation((key, val) => (mockSettings = val))
+                .mockImplementation((key, val) => (mockSettings = val)),
         } as any;
         main = Main.setup(mockGpg, mockStore);
         (mockGpg as any).__setEncrypted(false);
     });
 
     it('should setup ipc events', () => {
-        const onMock = (ipcMain.on as jest.MockedFunction<OnMockFn>).mock;
+        const onMock = (ipcMain.on as jest.Mock).mock;
 
         expect(onMock.calls[0][0]).toEqual(Events.PUBKEYS);
         expect(onMock.calls[0][1]).toBeInstanceOf(Function);
@@ -49,18 +44,86 @@ describe('Main', () => {
         expect(onMock.calls[1][1]).toBeInstanceOf(Function);
     });
 
+    describe('gpg path handling', () => {
+        it('should not apply wrong gpg executable config', () => {
+            expect(() => {
+                main.applySettings({ gpgPath: '/invalid/path/to/file' });
+            }).toThrow(
+                'Could not set executable path to /invalid/path/to/file'
+            );
+        });
+
+        it('should reply with an error when invalid gpg path was given', () => {
+            mockStore.get = jest
+                .fn()
+                .mockReturnValue({ gpgPath: '/valid/path' });
+
+            main.onSaveSettings(mockEvent, {
+                gpgPath: '/invalid/path/to/file',
+            });
+
+            expect(mockStore.get).toHaveBeenCalledWith(StoreKeys.SETTINGS);
+            expect(mockEvent.reply).toHaveBeenCalledWith(
+                Events.SAVE_SETTINGS_RESULT,
+                {
+                    error: new Error(
+                        'Could not set executable path to /invalid/path/to/file'
+                    ),
+                    settings: { gpgPath: '/valid/path' },
+                }
+            );
+        });
+
+        it('should correctly initialize on clean startup', () => {
+            mockStore.get = jest.fn().mockReturnValue({});
+            (mockGpg.detectExecutablePath as jest.Mock).mockReturnValue(
+                '/valid/gpg'
+            );
+
+            Main.initGpgPath(mockGpg, mockStore);
+
+            expect(mockStore.set as jest.Mock).toHaveBeenCalledWith(
+                StoreKeys.SETTINGS,
+                {
+                    gpgPath: '/valid/gpg',
+                }
+            );
+        });
+
+        it('should correctly initialize with invalid config', () => {
+            mockStore.get = jest
+                .fn()
+                .mockReturnValue({ gpgPath: '/invalid/path' });
+            (mockGpg.detectExecutablePath as jest.Mock).mockReturnValue(
+                '/valid/gpg'
+            );
+            (mockGpg.setExecutablePath as jest.Mock).mockReturnValue(false);
+
+            Main.initGpgPath(mockGpg, mockStore);
+
+            expect(mockStore.set as jest.Mock).toHaveBeenCalledWith(
+                StoreKeys.SETTINGS,
+                {
+                    gpgPath: '/valid/gpg',
+                }
+            );
+        });
+    });
+
     describe('onRequestPubKeys', () => {
         it('handles request for public keys', async () => {
-            (mockGpg.getPublicKeys as any).mockImplementation(async () => {
-                return ['alpha', 'beta'];
-            });
+            (mockGpg.getPublicKeys as jest.Mock).mockImplementation(
+                async () => {
+                    return ['alpha', 'beta'];
+                }
+            );
 
             await main.onRequestPubKeys(mockEvent);
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.PUBKEYS_RESULT,
-                { pubKeys: ['alpha', 'beta'] }
+                { pubKeys: ['alpha', 'beta'] },
             ]);
         });
 
@@ -75,7 +138,7 @@ describe('Main', () => {
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.PUBKEYS_RESULT,
-                { pubKeys: [], error: expectedError }
+                { pubKeys: [], error: expectedError },
             ]);
         });
     });
@@ -88,13 +151,13 @@ describe('Main', () => {
 
             await main.onRequestCrypt(mockEvent, {
                 recipients: ['alpha'],
-                text: 'foobar'
+                text: 'foobar',
             });
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
-                { encrypted: true, text: 'ENCRYPTED' }
+                { encrypted: true, text: 'ENCRYPTED' },
             ]);
         });
 
@@ -106,39 +169,39 @@ describe('Main', () => {
 
             await main.onRequestCrypt(mockEvent, {
                 recipients: [],
-                text: 'foobar'
+                text: 'foobar',
             });
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
-                { encrypted: false, text: 'DECRYPTED' }
+                { encrypted: false, text: 'DECRYPTED' },
             ]);
         });
 
         it('handles empty text', async () => {
             await main.onRequestCrypt(mockEvent, {
                 recipients: ['alpha'],
-                text: ''
+                text: '',
             });
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
-                { encrypted: false, text: '' }
+                { encrypted: false, text: '' },
             ]);
         });
 
         it('handles empty recipient list', async () => {
             await main.onRequestCrypt(mockEvent, {
                 recipients: [],
-                text: 'encrypt me plz!'
+                text: 'encrypt me plz!',
             });
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
-                { encrypted: false, text: '' }
+                { encrypted: false, text: '' },
             ]);
         });
     });
@@ -154,9 +217,10 @@ describe('Main', () => {
             );
             expect((mockEvent.reply as jest.Mock).mock.calls[0]).toEqual([
                 Events.LOAD_SETTINGS_RESULT,
-                'settings'
+                'settings',
             ]);
         });
+
         it('saves to store and applies settings', () => {
             const settings = { gpgPath: __filename };
             (mockGpg.setExecutablePath as jest.Mock).mockReturnValue(true);
@@ -166,6 +230,7 @@ describe('Main', () => {
             expect(mockSettings).toEqual(settings);
             expect(mockGpg.setExecutablePath).toHaveBeenCalledWith(__filename);
         });
+
         it('does not try to apply empty settings', () => {
             const gpgPath = (mockGpg.gpgPath = '/foo');
 

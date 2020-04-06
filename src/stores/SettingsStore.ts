@@ -1,12 +1,6 @@
 import debug from 'debug';
 import { IpcRendererEvent } from 'electron';
-import {
-    applySnapshot,
-    getEnv,
-    getSnapshot,
-    Instance,
-    types
-} from 'mobx-state-tree';
+import { getEnv, Instance, types } from 'mobx-state-tree';
 
 import { Events } from '../Constants';
 
@@ -24,9 +18,9 @@ const log = debug('ezgpg:settingsStore');
 export const SettingsStore = types
     .model('SettingsStore', {
         gpgPath: types.string,
-        lastError: types.maybe(types.string)
+        lastError: types.maybe(types.string),
     })
-    .actions(self => ({
+    .actions((self) => ({
         setGpgPath(gpgPath: string) {
             self.gpgPath = gpgPath;
         },
@@ -37,27 +31,27 @@ export const SettingsStore = types
         ) {
             log(
                 'Save result: Error=%s - Settings=%O',
-                response.error,
+                response.error?.message,
                 response.settings
             );
-            self.lastError = response?.error
-                ? response.error.message
-                : undefined;
+
             if (response.settings) {
-                applySnapshot(self, response.settings);
+                this.onLoadSettings(event, response.settings);
             }
+
+            self.lastError = response.error?.message;
         },
+
         onLoadSettings(event: IpcRendererEvent, settings: ISettings) {
-            if (settings) {
-                applySnapshot(self, settings);
+            if (settings?.gpgPath) {
+                self.gpgPath = settings.gpgPath;
             }
         },
 
         save() {
-            getEnv(self).ipcRenderer.send(
-                Events.SAVE_SETTINGS,
-                getSnapshot(self)
-            );
+            getEnv(self).ipcRenderer.send(Events.SAVE_SETTINGS, {
+                gpgPath: self.gpgPath,
+            });
         },
 
         load() {
@@ -73,6 +67,6 @@ export const SettingsStore = types
                 Events.SAVE_SETTINGS_RESULT,
                 this.onSaveSettings
             );
-        }
+        },
     }));
 export interface ISettingsStore extends Instance<typeof SettingsStore> {}

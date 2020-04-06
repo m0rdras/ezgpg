@@ -8,35 +8,37 @@ type SendMockFn = jest.MockedFunction<
     (channel: string, ...args: any[]) => void
 >;
 
+jest.mock('electron');
+
 describe('RootStore', () => {
     const createStore = () => {
         return RootStore.create(
             {
                 cryptStore: {
                     input: {
-                        val: 'input'
+                        val: 'input',
                     },
                     output: {
-                        val: 'output'
+                        val: 'output',
                     },
-                    pending: false
+                    pending: false,
                 },
                 gpgKeyStore: {
                     gpgKeys: {
                         alpha: {
                             email: 'alpha@user.com',
                             id: 'alpha',
-                            name: 'alpha user'
-                        }
+                            name: 'alpha user',
+                        },
                     },
-                    selectedKeys: ['alpha']
+                    selectedKeys: ['alpha'],
                 },
                 settingsStore: {
-                    gpgPath: '/foo/bar/gpg'
-                }
+                    gpgPath: '/foo/bar/gpg',
+                },
             },
             {
-                ipcRenderer
+                ipcRenderer,
             }
         );
     };
@@ -47,8 +49,8 @@ describe('RootStore', () => {
             Events.CRYPT,
             {
                 recipients: ['alpha'],
-                text: 'input'
-            }
+                text: 'input',
+            },
         ]);
     });
 
@@ -61,5 +63,18 @@ describe('RootStore', () => {
     it('should be destructible', () => {
         const store = createStore();
         destroy(store);
+    });
+
+    it('should initialize loading of sub-stores', () => {
+        const store = createStore();
+
+        store.load();
+
+        expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(
+            Events.PUBKEYS
+        );
+        expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(
+            Events.LOAD_SETTINGS
+        );
     });
 });
