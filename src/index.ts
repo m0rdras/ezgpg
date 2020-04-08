@@ -22,8 +22,8 @@ const createWindow = async () => {
             width: 1024,
             title: 'ezgpg',
             webPreferences: {
-                nodeIntegration: true,
-            },
+                nodeIntegration: true
+            }
         }
         // tslint:enable:object-literal-sort-keys
     );

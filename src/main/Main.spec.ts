@@ -29,7 +29,7 @@ describe('Main', () => {
             get: jest.fn().mockImplementation(() => mockSettings),
             set: jest
                 .fn()
-                .mockImplementation((key, val) => (mockSettings = val)),
+                .mockImplementation((key, val) => (mockSettings = val))
         } as any;
         main = Main.setup(mockGpg, mockStore);
         (mockGpg as any).__setEncrypted(false);
@@ -59,7 +59,7 @@ describe('Main', () => {
                 .mockReturnValue({ gpgPath: '/valid/path' });
 
             main.onSaveSettings(mockEvent, {
-                gpgPath: '/invalid/path/to/file',
+                gpgPath: '/invalid/path/to/file'
             });
 
             expect(mockStore.get).toHaveBeenCalledWith(StoreKeys.SETTINGS);
@@ -69,7 +69,7 @@ describe('Main', () => {
                     error: new Error(
                         'Could not set executable path to /invalid/path/to/file'
                     ),
-                    settings: { gpgPath: '/valid/path' },
+                    settings: { gpgPath: '/valid/path' }
                 }
             );
         });
@@ -85,7 +85,7 @@ describe('Main', () => {
             expect(mockStore.set as jest.Mock).toHaveBeenCalledWith(
                 StoreKeys.SETTINGS,
                 {
-                    gpgPath: '/valid/gpg',
+                    gpgPath: '/valid/gpg'
                 }
             );
         });
@@ -104,7 +104,7 @@ describe('Main', () => {
             expect(mockStore.set as jest.Mock).toHaveBeenCalledWith(
                 StoreKeys.SETTINGS,
                 {
-                    gpgPath: '/valid/gpg',
+                    gpgPath: '/valid/gpg'
                 }
             );
         });
@@ -123,7 +123,7 @@ describe('Main', () => {
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.PUBKEYS_RESULT,
-                { pubKeys: ['alpha', 'beta'] },
+                { pubKeys: ['alpha', 'beta'] }
             ]);
         });
 
@@ -138,7 +138,7 @@ describe('Main', () => {
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.PUBKEYS_RESULT,
-                { pubKeys: [], error: expectedError },
+                { pubKeys: [], error: expectedError }
             ]);
         });
     });
@@ -151,13 +151,13 @@ describe('Main', () => {
 
             await main.onRequestCrypt(mockEvent, {
                 recipients: ['alpha'],
-                text: 'foobar',
+                text: 'foobar'
             });
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
-                { encrypted: true, text: 'ENCRYPTED' },
+                { encrypted: true, text: 'ENCRYPTED' }
             ]);
         });
 
@@ -169,39 +169,39 @@ describe('Main', () => {
 
             await main.onRequestCrypt(mockEvent, {
                 recipients: [],
-                text: 'foobar',
+                text: 'foobar'
             });
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
-                { encrypted: false, text: 'DECRYPTED' },
+                { encrypted: false, text: 'DECRYPTED' }
             ]);
         });
 
         it('handles empty text', async () => {
             await main.onRequestCrypt(mockEvent, {
                 recipients: ['alpha'],
-                text: '',
+                text: ''
             });
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
-                { encrypted: false, text: '' },
+                { encrypted: false, text: '' }
             ]);
         });
 
         it('handles empty recipient list', async () => {
             await main.onRequestCrypt(mockEvent, {
                 recipients: [],
-                text: 'encrypt me plz!',
+                text: 'encrypt me plz!'
             });
 
             expect(mockReply.calls).toHaveLength(1);
             expect(mockReply.calls[0]).toEqual([
                 Events.CRYPT_RESULT,
-                { encrypted: false, text: '' },
+                { encrypted: false, text: '' }
             ]);
         });
     });
@@ -217,7 +217,7 @@ describe('Main', () => {
             );
             expect((mockEvent.reply as jest.Mock).mock.calls[0]).toEqual([
                 Events.LOAD_SETTINGS_RESULT,
-                'settings',
+                'settings'
             ]);
         });
 

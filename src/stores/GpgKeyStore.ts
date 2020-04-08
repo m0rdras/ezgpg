@@ -17,9 +17,9 @@ export const GpgKeyStore = types
         gpgKeys: types.map(GpgKey),
         selectedKeys: types.array(types.reference(GpgKey))
     })
-    .views(self => ({
+    .views((self) => ({
         get selectedKeyIds() {
-            return self.selectedKeys.map(key => key.id);
+            return self.selectedKeys.map((key) => key.id);
         },
         get sortedKeys() {
             return Array.from(self.gpgKeys.values()).sort(
@@ -32,7 +32,7 @@ export const GpgKeyStore = types
             );
         }
     }))
-    .actions(self => ({
+    .actions((self) => ({
         afterCreate() {
             getEnv(self).ipcRenderer.on(
                 Events.PUBKEYS_RESULT,
@@ -57,7 +57,7 @@ export const GpgKeyStore = types
                 return;
             }
             log('received %d pub keys: %O', pubKeys.length, pubKeys);
-            pubKeys.forEach(key => self.gpgKeys.put(key));
+            pubKeys.forEach((key) => self.gpgKeys.put(key));
         },
 
         load() {
@@ -69,8 +69,8 @@ export const GpgKeyStore = types
             self.selectedKeys.clear();
             self.selectedKeys.push(
                 ...(names
-                    .map(name => self.gpgKeys.get(name))
-                    .filter(gpgKey => gpgKey !== undefined) as IGpgKey[])
+                    .map((name) => self.gpgKeys.get(name))
+                    .filter((gpgKey) => gpgKey !== undefined) as IGpgKey[])
             );
         }
     }));

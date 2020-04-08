@@ -10,7 +10,7 @@ describe('SettingsStore', () => {
     const createStore = () =>
         SettingsStore.create(
             {
-                gpgPath: '/foo',
+                gpgPath: '/foo'
             },
             deps
         );
@@ -20,8 +20,8 @@ describe('SettingsStore', () => {
             ipcRenderer: {
                 off: jest.fn(),
                 on: jest.fn(),
-                send: jest.fn(),
-            },
+                send: jest.fn()
+            }
         };
         store = createStore();
     });
@@ -37,7 +37,7 @@ describe('SettingsStore', () => {
     it('sends load event', () => {
         store.load();
         expect(deps.ipcRenderer.send.mock.calls[0]).toEqual([
-            Events.LOAD_SETTINGS,
+            Events.LOAD_SETTINGS
         ]);
     });
 
@@ -45,7 +45,7 @@ describe('SettingsStore', () => {
         store.save();
         expect(deps.ipcRenderer.send.mock.calls[0]).toEqual([
             Events.SAVE_SETTINGS,
-            { gpgPath: '/foo' },
+            { gpgPath: '/foo' }
         ]);
     });
 
@@ -61,7 +61,7 @@ describe('SettingsStore', () => {
 
     it('handles save event response without error', () => {
         store.onSaveSettings(undefined as any, {
-            settings: { gpgPath: '/foobar' },
+            settings: { gpgPath: '/foobar' }
         });
         expect(store.gpgPath).toEqual('/foobar');
     });
@@ -70,12 +70,12 @@ describe('SettingsStore', () => {
         store = SettingsStore.create(
             {
                 gpgPath: '/foo',
-                lastError: 'dummy error message',
+                lastError: 'dummy error message'
             },
             deps
         );
         store.onSaveSettings(undefined as any, {
-            settings: { gpgPath: '/foobar' },
+            settings: { gpgPath: '/foobar' }
         });
         expect(store.lastError).toBeUndefined();
     });
@@ -83,7 +83,7 @@ describe('SettingsStore', () => {
     it('handles errors in save settings response', () => {
         store.onSaveSettings(undefined as any, {
             error: new Error('😱'),
-            settings: { gpgPath: '/foobar' },
+            settings: { gpgPath: '/foobar' }
         });
         expect(store.lastError).toEqual('😱');
     });

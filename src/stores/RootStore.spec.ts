@@ -16,29 +16,29 @@ describe('RootStore', () => {
             {
                 cryptStore: {
                     input: {
-                        val: 'input',
+                        val: 'input'
                     },
                     output: {
-                        val: 'output',
+                        val: 'output'
                     },
-                    pending: false,
+                    pending: false
                 },
                 gpgKeyStore: {
                     gpgKeys: {
                         alpha: {
                             email: 'alpha@user.com',
                             id: 'alpha',
-                            name: 'alpha user',
-                        },
+                            name: 'alpha user'
+                        }
                     },
-                    selectedKeys: ['alpha'],
+                    selectedKeys: ['alpha']
                 },
                 settingsStore: {
-                    gpgPath: '/foo/bar/gpg',
-                },
+                    gpgPath: '/foo/bar/gpg'
+                }
             },
             {
-                ipcRenderer,
+                ipcRenderer
             }
         );
     };
@@ -49,8 +49,8 @@ describe('RootStore', () => {
             Events.CRYPT,
             {
                 recipients: ['alpha'],
-                text: 'input',
-            },
+                text: 'input'
+            }
         ]);
     });
 

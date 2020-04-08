@@ -34,11 +34,11 @@ export default class Main {
 
         const main = new Main(gpg, store);
 
-        ipcMain.on(Events.PUBKEYS, event => main.onRequestPubKeys(event));
+        ipcMain.on(Events.PUBKEYS, (event) => main.onRequestPubKeys(event));
         ipcMain.on(Events.CRYPT, (event, data) =>
             main.onRequestCrypt(event, data)
         );
-        ipcMain.on(Events.LOAD_SETTINGS, event => main.onLoadSettings(event));
+        ipcMain.on(Events.LOAD_SETTINGS, (event) => main.onLoadSettings(event));
         ipcMain.on(Events.SAVE_SETTINGS, (event, data) =>
             main.onSaveSettings(event, data)
         );

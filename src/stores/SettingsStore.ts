@@ -18,7 +18,7 @@ const log = debug('ezgpg:settingsStore');
 export const SettingsStore = types
     .model('SettingsStore', {
         gpgPath: types.string,
-        lastError: types.maybe(types.string),
+        lastError: types.maybe(types.string)
     })
     .actions((self) => ({
         setGpgPath(gpgPath: string) {
@@ -50,7 +50,7 @@ export const SettingsStore = types
 
         save() {
             getEnv(self).ipcRenderer.send(Events.SAVE_SETTINGS, {
-                gpgPath: self.gpgPath,
+                gpgPath: self.gpgPath
             });
         },
 
@@ -67,6 +67,6 @@ export const SettingsStore = types
                 Events.SAVE_SETTINGS_RESULT,
                 this.onSaveSettings
             );
-        },
+        }
     }));
 export interface ISettingsStore extends Instance<typeof SettingsStore> {}

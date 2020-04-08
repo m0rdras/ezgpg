@@ -5,7 +5,7 @@ export const IOText = types
     .model('IOText', {
         val: types.string
     })
-    .actions(self => ({
+    .actions((self) => ({
         setText(text: string) {
             self.val = text;
         }
@@ -18,7 +18,7 @@ export const CryptStore = types
         output: IOText,
         pending: false
     })
-    .actions(self => {
+    .actions((self) => {
         return {
             handleGpgCryptResponse(
                 event: Electron.IpcRendererEvent,

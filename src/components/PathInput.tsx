@@ -29,7 +29,9 @@ const PathInput: React.FC<IPathInputProps> = observer(
                 <div>
                     <Input
                         value={path}
-                        onChange={event => onChange(event.currentTarget.value)}
+                        onChange={(event) =>
+                            onChange(event.currentTarget.value)
+                        }
                         label={
                             <Button
                                 icon='folder open'

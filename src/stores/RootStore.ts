@@ -16,7 +16,7 @@ export const RootStore = types
         gpgKeyStore: GpgKeyStore,
         settingsStore: SettingsStore
     })
-    .actions(self => {
+    .actions((self) => {
         let disposer: IReactionDisposer;
 
         const onInputChange = () => {

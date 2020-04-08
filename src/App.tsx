@@ -15,7 +15,7 @@ log('Created root store %O', rootStore);
 rootStore.load();
 
 if (process.env.NODE_ENV === 'development') {
-    onSnapshot(rootStore, snapshot => {
+    onSnapshot(rootStore, (snapshot) => {
         log('New state snapshot: %O', snapshot);
     });
 }

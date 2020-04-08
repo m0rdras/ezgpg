@@ -91,7 +91,7 @@ describe('Gpg', () => {
                     on: jest.fn(),
                     stderr: null,
                     stdin: null,
-                    stdout: null,
+                    stdout: null
                 } as any);
             gpg = new Gpg('gpg', spawnFn);
             const result = gpg.spawn();
@@ -158,7 +158,7 @@ describe('Gpg', () => {
                     on: eventHandler,
                     stderr: stderrStream,
                     stdin: stdinStream,
-                    stdout: stdoutStream,
+                    stdout: stdoutStream
                 } as ChildProcess;
             };
 
@@ -196,13 +196,13 @@ describe('Gpg', () => {
                     {
                         email: 'ezgpg@dev.local',
                         id: ezGpgKeyId,
-                        name: 'ezgpg',
+                        name: 'ezgpg'
                     },
                     {
                         email: 'izzy@dev.local',
                         id: izzyGpgKeyId,
-                        name: 'Izzy Geepegee',
-                    },
+                        name: 'Izzy Geepegee'
+                    }
                 ]);
             });
         });
@@ -221,13 +221,13 @@ describe('Gpg', () => {
                     '--trust-model',
                     'always',
                     '-r',
-                    ezGpgKeyId,
+                    ezGpgKeyId
                 ]);
             });
             it('should encrypt a message to a multiple recipients', async () => {
                 const result = gpg.encrypt('secret', [
                     ezGpgKeyId,
-                    izzyGpgKeyId,
+                    izzyGpgKeyId
                 ]);
                 stdoutStream.push('encrypted');
 
@@ -242,7 +242,7 @@ describe('Gpg', () => {
                     '-r',
                     ezGpgKeyId,
                     '-r',
-                    izzyGpgKeyId,
+                    izzyGpgKeyId
                 ]);
             });
             it('should reject if no recipients are given', async () => {
@@ -264,7 +264,7 @@ describe('Gpg', () => {
                     '-d',
                     '-a',
                     '--trust-model',
-                    'always',
+                    'always'
                 ]);
             });
         });

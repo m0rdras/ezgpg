@@ -78,9 +78,9 @@ export default class Gpg {
                     return reject(new Error('Error while spawning GPG'));
                 }
 
-                child.stderr.on('data', data => (stderr += data));
+                child.stderr.on('data', (data) => (stderr += data));
 
-                child.on('close', code =>
+                child.on('close', (code) =>
                     code === 0
                         ? resolve(stdout)
                         : reject(new GpgError(code, stderr))
@@ -110,7 +110,7 @@ export default class Gpg {
             .slice(2) // cut first two lines
             .join('\n')
             .split('\n\n')
-            .map(str => {
+            .map((str) => {
                 const lines = str.split('\n') ?? [];
                 assert(lines.length >= 4);
 
@@ -127,7 +127,7 @@ export default class Gpg {
     }
 
     public async encrypt(input: string, recipients: readonly string[]) {
-        const recipientArgs = recipients.map(id => ['-r', id]).flat();
+        const recipientArgs = recipients.map((id) => ['-r', id]).flat();
 
         return this.spawn(
             ['-e', '-a', '--trust-model', 'always'].concat(recipientArgs),
