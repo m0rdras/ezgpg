@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { Container, Table } from 'semantic-ui-react';
+import { Button, Container, Icon, Table } from 'semantic-ui-react';
 
 import { IGpgKeyStore } from '../stores/GpgKeyStore';
 
@@ -9,7 +9,7 @@ interface IKeysPageProps {
 }
 
 const KeysPage: React.FC<IKeysPageProps> = observer(({ keyStore }) => {
-    const rows = keyStore.sortedKeys.map(key => (
+    const rows = keyStore.sortedKeys.map((key) => (
         <Table.Row key={key.id}>
             <Table.Cell>{key.id}</Table.Cell>
             <Table.Cell>{key.name}</Table.Cell>
@@ -18,6 +18,13 @@ const KeysPage: React.FC<IKeysPageProps> = observer(({ keyStore }) => {
     ));
     return (
         <Container>
+            <Button onClick={() => keyStore.load()} icon>
+                <Icon name='redo' />
+            </Button>
+            {/* not yet */}
+            {/*<Button icon>*/}
+            {/*    <Icon name='plus' />*/}
+            {/*</Button>*/}
             <Table celled>
                 <Table.Header>
                     <Table.Row>
