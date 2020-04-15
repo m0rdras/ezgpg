@@ -30,6 +30,7 @@ export default class Gpg {
             text.search('-----END PGP MESSAGE-----\n') > -1
         );
     }
+
     constructor(
         public gpgPath: string = '',
         private spawnFn: SpawnFunction = defaultSpawnFn
@@ -110,20 +111,7 @@ export default class Gpg {
             .slice(2) // cut first two lines
             .join('\n')
             .split('\n\n')
-            .map((str) => {
-                const lines = str.split('\n') ?? [];
-                assert(lines.length >= 4);
-
-                const id = lines[1].trim();
-                const matches = lines[2].match(/^uid\s+\[.*] (.*?)( <(.*)>)?$/);
-                const name = matches?.[1];
-                const email =
-                    matches?.length && matches.length >= 3
-                        ? matches[3]
-                        : '<none>';
-
-                return { id, name, email };
-            });
+            .map(Gpg.parseGpgPubKeyOutput);
     }
 
     public async encrypt(input: string, recipients: readonly string[]) {
@@ -137,5 +125,17 @@ export default class Gpg {
 
     public async decrypt(input: string) {
         return this.spawn(['-d', '-a', '--trust-model', 'always'], input);
+    }
+
+    private static parseGpgPubKeyOutput(str: string) {
+        const lines = str.split('\n');
+        assert(lines.length >= 4);
+
+        const id = lines[1].trim();
+        const matches = lines[2].match(/^uid\s+\[.*] (.*?)( <(.*)>)?$/);
+        const name = matches?.[1];
+        const email = matches?.[3];
+
+        return { id, name, email };
     }
 }

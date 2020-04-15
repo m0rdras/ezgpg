@@ -18,7 +18,7 @@ const KeysPage: React.FC<IKeysPageProps> = observer(({ keyStore }) => {
     ));
     return (
         <Container>
-            <Button onClick={() => keyStore.load()} icon>
+            <Button onClick={keyStore.load} icon>
                 <Icon name='redo' />
             </Button>
             {/* not yet */}

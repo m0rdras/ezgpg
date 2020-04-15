@@ -1,5 +1,5 @@
 import Electron from 'electron';
-import { mount, shallow } from 'enzyme';
+import { mount, ReactWrapper, shallow } from 'enzyme';
 import React from 'react';
 import { Input } from 'semantic-ui-react';
 import PathInput from './PathInput';
@@ -30,18 +30,35 @@ describe('PathInput', () => {
         expect(onChange.mock.calls[0][0]).toEqual('/foo');
     });
 
-    it('should accept file paths from dialog', () => {
-        (dialog.showOpenDialogSync as any).mockReturnValue(['/foo']);
+    describe('using a file selection dialog', () => {
+        let onChange: jest.Mock;
+        let wrapper: ReactWrapper;
+        let btn: ReactWrapper;
 
-        const onChange = jest.fn();
-        const wrapper = mount(
-            <PathInput path='/some/path' label='bar' onChange={onChange} />
-        );
+        beforeEach(() => {
+            onChange = jest.fn();
+            wrapper = mount(
+                <PathInput path='/some/path' label='bar' onChange={onChange} />
+            );
 
-        const btn = wrapper.find('Button');
-        expect(btn).toHaveLength(1);
-        btn.simulate('click');
+            btn = wrapper.find('Button');
+            expect(btn).toHaveLength(1);
+        });
 
-        expect(onChange.mock.calls[0][0]).toEqual('/foo');
+        it('should accept file paths from dialog', () => {
+            (dialog.showOpenDialogSync as any).mockReturnValue(['/foo']);
+
+            btn.simulate('click');
+
+            expect(onChange).toHaveBeenCalledWith('/foo');
+        });
+
+        it('should handle cancelled file selection', () => {
+            (dialog.showOpenDialogSync as any).mockReturnValue(undefined);
+
+            btn.simulate('click');
+
+            expect(onChange).not.toHaveBeenCalled();
+        });
     });
 });

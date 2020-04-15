@@ -14,7 +14,7 @@ const listKeysOutput = `
 ---------------------------------
 pub   rsa4096 2019-07-31 [SC]
       ${ezGpgKeyId}
-uid           [ unknown] ezgpg <ezgpg@dev.local>
+uid           [ unknown] ezgpg
 sub   rsa4096 2019-07-31 [E]
 
 pub   rsa4096 2020-07-31 [SC]
@@ -194,7 +194,7 @@ describe('Gpg', () => {
 
                 await expect(result).resolves.toEqual([
                     {
-                        email: 'ezgpg@dev.local',
+                        email: undefined,
                         id: ezGpgKeyId,
                         name: 'ezgpg'
                     },

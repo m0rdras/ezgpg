@@ -12,7 +12,7 @@ const RecipientDropdown: React.FC<IRecipientDropdownProps> = observer(
     ({ keyStore }) => {
         const recipients = keyStore.sortedKeys.map((el) => ({
             key: el.id,
-            text: (el.name ?? '[unnamed]') + (el.email ? ` <${el.email}>` : ''),
+            text: (el.name ?? '[unnamed]') + (el.email && ` <${el.email}>`),
             value: el.id
         }));
         return (
