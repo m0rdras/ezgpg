@@ -24,7 +24,7 @@ describe('KeysPage', () => {
         });
 
         it('renders', () => {
-            expect(wrapper.find(Table.Row)).toHaveLength(2);
+            expect(wrapper).toHaveLength(1);
         });
 
         it('reloads keys', () => {
@@ -34,7 +34,6 @@ describe('KeysPage', () => {
         });
     });
 
-    // TODO these tests prevent clean jest exit
     describe('on deletion', () => {
         let wrapper: ReactWrapper<typeof KeysPage>;
 
@@ -42,6 +41,10 @@ describe('KeysPage', () => {
             wrapper = mount(<KeysPage keyStore={keyStore} />);
             wrapper.find(Table.Row).last().simulate('click');
             wrapper.find('Button.delete-button').simulate('click');
+        });
+
+        afterEach(() => {
+            wrapper.unmount();
         });
 
         it('opens confirmation dialog', () => {
