@@ -269,6 +269,13 @@ describe('Gpg', () => {
             });
         });
 
+        describe('delete pub keys', () => {
+            it('should correctly delete a key', async () => {
+                await gpg.deleteKey('foo');
+                expect(gpgArgs).toEqual(['--batch', '--delete-keys', 'foo']);
+            });
+        });
+
         describe('isEncrypted', () => {
             it('should correctly identify encrypted messages', () => {
                 expect(Gpg.isEncrypted(encryptedData)).toBe(true);

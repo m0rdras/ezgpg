@@ -49,10 +49,18 @@ describe('Main', () => {
         it('should have set up ipc events', () => {
             const onMock = (ipcMain.on as jest.Mock).mock;
 
+            expect(ipcMain.on).toHaveBeenCalledTimes(5);
+
             expect(onMock.calls[0][0]).toEqual(Events.PUBKEYS);
             expect(onMock.calls[0][1]).toBeInstanceOf(Function);
-            expect(onMock.calls[1][0]).toEqual(Events.CRYPT);
+            expect(onMock.calls[1][0]).toEqual(Events.PUBKEY_DELETE);
             expect(onMock.calls[1][1]).toBeInstanceOf(Function);
+            expect(onMock.calls[2][0]).toEqual(Events.CRYPT);
+            expect(onMock.calls[2][1]).toBeInstanceOf(Function);
+            expect(onMock.calls[3][0]).toEqual(Events.LOAD_SETTINGS);
+            expect(onMock.calls[3][1]).toBeInstanceOf(Function);
+            expect(onMock.calls[4][0]).toEqual(Events.SAVE_SETTINGS);
+            expect(onMock.calls[4][1]).toBeInstanceOf(Function);
         });
 
         describe('gpg path handling', () => {
@@ -125,7 +133,7 @@ describe('Main', () => {
             it('handles request for public keys', async () => {
                 (mockGpg.getPublicKeys as jest.Mock).mockImplementation(
                     async () => {
-                        return ['alpha', 'beta'];
+                        return Promise.resolve(['alpha', 'beta']);
                     }
                 );
 
@@ -140,7 +148,7 @@ describe('Main', () => {
 
             it('handles request for public keys when gpg errors', async () => {
                 const expectedError = new GpgError(2, 'error');
-                (mockGpg.getPublicKeys as any).mockImplementation(async () => {
+                (mockGpg.getPublicKeys as any).mockImplementation(() => {
                     throw expectedError;
                 });
 
@@ -154,9 +162,43 @@ describe('Main', () => {
             });
         });
 
+        describe('onDeletePubKey', () => {
+            it('replies on successfully deleting a key', async () => {
+                (mockGpg.deleteKey as jest.Mock).mockImplementation(() =>
+                    Promise.resolve()
+                );
+
+                await main.onDeletePubKey(mockEvent, 'key-id');
+
+                expect(mockEvent.reply).toHaveBeenCalledWith(
+                    Events.PUBKEY_DELETE,
+                    {
+                        keyId: 'key-id'
+                    }
+                );
+            });
+
+            it('replies with error when deleting fails', async () => {
+                const error = new Error('epic fail');
+                (mockGpg.deleteKey as jest.Mock).mockImplementation(() =>
+                    Promise.reject(error)
+                );
+
+                await main.onDeletePubKey(mockEvent, 'key-id');
+
+                expect(mockEvent.reply).toHaveBeenCalledWith(
+                    Events.PUBKEY_DELETE,
+                    {
+                        keyId: 'key-id',
+                        error
+                    }
+                );
+            });
+        });
+
         describe('onRequestCrypt', () => {
             it('encrypts unencrypted text', async () => {
-                (mockGpg.encrypt as any).mockImplementation(async () => {
+                (mockGpg.encrypt as any).mockImplementation(() => {
                     return Promise.resolve('ENCRYPTED');
                 });
 
@@ -174,7 +216,7 @@ describe('Main', () => {
 
             it('decrypts encrypted text', async () => {
                 (mockGpg as any).__setEncrypted(true);
-                (mockGpg.decrypt as any).mockImplementation(async () => {
+                (mockGpg.decrypt as any).mockImplementation(() => {
                     return Promise.resolve('DECRYPTED');
                 });
 

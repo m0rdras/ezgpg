@@ -22,34 +22,51 @@ describe('GpgKeyStore', () => {
         };
     });
 
+    it('knows about all handlers', () => {
+        store = createStore();
+        expect(store.getHandlers()).toEqual([
+            [Events.PUBKEYS_RESULT, store.onGpgKeyResponse],
+            [Events.PUBKEY_DELETE, store.onDeleteKeyResponse]
+        ]);
+    });
+
     it('initializes and registers handler', () => {
         store = createStore();
-        expect(deps.ipcRenderer.on.mock.calls[0][0]).toBe(
-            Events.PUBKEYS_RESULT
-        );
-        expect(deps.ipcRenderer.on.mock.calls[0][1]).toBe(
+
+        expect(deps.ipcRenderer.on).toHaveBeenCalledTimes(2);
+        expect(deps.ipcRenderer.on).toHaveBeenCalledWith(
+            Events.PUBKEYS_RESULT,
             store.onGpgKeyResponse
+        );
+        expect(deps.ipcRenderer.on).toHaveBeenCalledWith(
+            Events.PUBKEY_DELETE,
+            store.onDeleteKeyResponse
         );
     });
 
     it('destroys and unregisters handler', () => {
         store = createStore();
         destroy(store);
-        expect(deps.ipcRenderer.off.mock.calls[0][0]).toBe(
-            Events.PUBKEYS_RESULT
-        );
-        expect(deps.ipcRenderer.off.mock.calls[0][1]).toBe(
+
+        expect(deps.ipcRenderer.off).toHaveBeenCalledTimes(2);
+        expect(deps.ipcRenderer.off).toHaveBeenCalledWith(
+            Events.PUBKEYS_RESULT,
             store.onGpgKeyResponse
+        );
+        expect(deps.ipcRenderer.off).toHaveBeenCalledWith(
+            Events.PUBKEY_DELETE,
+            store.onDeleteKeyResponse
         );
     });
 
     it('sends IPC message to load data', () => {
         store = createStore();
         store.load();
-        expect(deps.ipcRenderer.send.mock.calls[0][0]).toBe(Events.PUBKEYS);
+
+        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.PUBKEYS);
     });
 
-    it('handles response correctly', () => {
+    it('handles pubkey response correctly', () => {
         store = createStore();
         store.onGpgKeyResponse({} as Electron.IpcRendererEvent, {
             pubKeys: [
@@ -57,6 +74,7 @@ describe('GpgKeyStore', () => {
                 { id: '2', name: 'two', email: 'two@dev.local' }
             ]
         });
+
         expect(store.gpgKeys.get('1')).toEqual({
             email: 'one@dev.local',
             id: '1',
@@ -70,7 +88,7 @@ describe('GpgKeyStore', () => {
         expect(store.gpgKeys.size).toBe(2);
     });
 
-    it('handles error in response correctly', () => {
+    it('handles error in pubkey response correctly', () => {
         store = createStore({
             1: { id: '1', name: 'beta', email: 'beta@dev.local' }
         });
@@ -87,6 +105,7 @@ describe('GpgKeyStore', () => {
             1: { id: '1', name: 'beta', email: 'beta@dev.local' },
             2: { id: '2', name: 'alpha', email: 'alpha@dev.local' }
         });
+
         expect(store.sortedKeys).toEqual([
             { id: '2', name: 'alpha', email: 'alpha@dev.local' },
             { id: '1', name: 'beta', email: 'beta@dev.local' }
@@ -98,6 +117,7 @@ describe('GpgKeyStore', () => {
             abc: { id: 'abc', name: 'alpha', email: 'alpha@dev.local' },
             def: { id: 'def', name: 'alpha', email: 'alpha@dev.local' }
         });
+
         expect(store.sortedKeys).toEqual([
             { id: 'abc', name: 'alpha', email: 'alpha@dev.local' },
             { id: 'def', name: 'alpha', email: 'alpha@dev.local' }
@@ -109,9 +129,41 @@ describe('GpgKeyStore', () => {
             1: { id: '1', name: 'alpha', email: 'beta@dev.local' },
             2: { id: '2', name: 'beta', email: 'alpha@dev.local' }
         });
+
         store.setSelectedKeys(['2', '3']);
         expect(store.selectedKeys).toEqual([
             { id: '2', name: 'beta', email: 'alpha@dev.local' }
         ]);
+    });
+
+    it('sends IPC message to delete key', () => {
+        store = createStore();
+        store.deleteKey('foo');
+
+        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(
+            Events.PUBKEY_DELETE,
+            'foo'
+        );
+    });
+
+    it('handles successful delete key response', () => {
+        store = createStore();
+
+        store.onDeleteKeyResponse({} as Electron.IpcRendererEvent, {
+            keyId: 'foo'
+        });
+
+        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.PUBKEYS);
+    });
+
+    it('handles unsuccessful delete key response', () => {
+        store = createStore();
+
+        store.onDeleteKeyResponse({} as Electron.IpcRendererEvent, {
+            keyId: 'foo',
+            error: new Error('fail')
+        });
+
+        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.PUBKEYS);
     });
 });

@@ -127,6 +127,10 @@ export default class Gpg {
         return this.spawn(['-d', '-a', '--trust-model', 'always'], input);
     }
 
+    public async deleteKey(keyId: string) {
+        return this.spawn(['--delete-keys', keyId]);
+    }
+
     private static parseGpgPubKeyOutput(str: string) {
         const lines = str.split('\n');
         assert(lines.length >= 4);

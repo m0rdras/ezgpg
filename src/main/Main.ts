@@ -35,6 +35,7 @@ export default class Main {
         const main = new Main(gpg, store);
 
         ipcMain.on(Events.PUBKEYS, main.onRequestPubKeys.bind(main));
+        ipcMain.on(Events.PUBKEY_DELETE, main.onDeletePubKey.bind(main));
         ipcMain.on(Events.CRYPT, main.onRequestCrypt.bind(main));
         ipcMain.on(Events.LOAD_SETTINGS, main.onLoadSettings.bind(main));
         ipcMain.on(Events.SAVE_SETTINGS, main.onSaveSettings.bind(main));
@@ -55,6 +56,15 @@ export default class Main {
         } catch (error) {
             log('Error while getting public keys: %O', error);
             event.reply(Events.PUBKEYS_RESULT, { pubKeys: [], error });
+        }
+    }
+
+    async onDeletePubKey(event: Electron.IpcMainEvent, keyId: string) {
+        try {
+            await this.gpg.deleteKey(keyId);
+            event.reply(Events.PUBKEY_DELETE, { keyId });
+        } catch (error) {
+            event.reply(Events.PUBKEY_DELETE, { keyId, error });
         }
     }
 

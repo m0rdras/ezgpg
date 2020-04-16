@@ -33,17 +33,22 @@ export const GpgKeyStore = types
         }
     }))
     .actions((self) => ({
+        getHandlers() {
+            return [
+                [Events.PUBKEYS_RESULT, this.onGpgKeyResponse],
+                [Events.PUBKEY_DELETE, this.onDeleteKeyResponse]
+            ];
+        },
+
         afterCreate() {
-            getEnv(self).ipcRenderer.on(
-                Events.PUBKEYS_RESULT,
-                this.onGpgKeyResponse
+            this.getHandlers().forEach(([channel, handler]) =>
+                getEnv(self).ipcRenderer.on(channel, handler)
             );
         },
 
         beforeDestroy() {
-            getEnv(self).ipcRenderer.off(
-                Events.PUBKEYS_RESULT,
-                this.onGpgKeyResponse
+            this.getHandlers().forEach(([channel, handler]) =>
+                getEnv(self).ipcRenderer.off(channel, handler)
             );
         },
 
@@ -63,6 +68,22 @@ export const GpgKeyStore = types
         load() {
             log('requesting pub keys');
             getEnv(self).ipcRenderer.send(Events.PUBKEYS);
+        },
+
+        deleteKey(id: string) {
+            getEnv(self).ipcRenderer.send(Events.PUBKEY_DELETE, id);
+        },
+
+        onDeleteKeyResponse(
+            event: Electron.IpcRendererEvent,
+            { keyId, error }: { keyId: string; error?: Error }
+        ) {
+            if (error) {
+                log('Error while deleting key %s: %O', keyId, error);
+            } else {
+                log('Deleted key %s', keyId);
+            }
+            this.load();
         },
 
         setSelectedKeys(names: string[]) {

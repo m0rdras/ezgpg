@@ -3,6 +3,7 @@ let __encrypted = false;
 const mock = jest.fn().mockImplementation(() => {
     return {
         decrypt: jest.fn(),
+        deleteKey: jest.fn(),
         detectExecutablePath: jest.fn(),
         encrypt: jest.fn(),
         getPublicKeys: jest.fn(),
