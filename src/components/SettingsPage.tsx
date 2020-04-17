@@ -10,11 +10,11 @@ import PathInput from './PathInput';
 const log = debug('ezgpg:SettingsPage');
 const { access } = fs.promises;
 
-interface ISettingsStoreProps {
+interface SettingsStoreProps {
     settingsStore: ISettingsStore;
 }
 
-const SettingsPage: React.FC<ISettingsStoreProps> = observer(
+const SettingsPage: React.FC<SettingsStoreProps> = observer(
     ({ settingsStore }) => {
         const [curGpgPath, setCurGpgPath] = useState(settingsStore.gpgPath);
         const [saveDisabled, setSaveDisabled] = useState(true);

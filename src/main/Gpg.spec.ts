@@ -52,7 +52,7 @@ describe('Gpg', () => {
 
             const detectedPath = gpg.detectExecutablePath();
 
-            expect(existsMock.mock.calls.length).toBe(1);
+            expect(existsMock.mock.calls).toHaveLength(1);
             expect(existsMock.mock.calls[0][0]).toEqual(DEFAULT_PATHS[0]);
             expect(detectedPath).toEqual(DEFAULT_PATHS[0]);
         });
@@ -62,7 +62,7 @@ describe('Gpg', () => {
 
             const detectedPath = gpg.detectExecutablePath();
 
-            expect(existsMock.mock.calls.length).toBe(2);
+            expect(existsMock.mock.calls).toHaveLength(2);
             expect(existsMock.mock.calls[0][0]).toEqual(DEFAULT_PATHS[0]);
             expect(existsMock.mock.calls[1][0]).toEqual(DEFAULT_PATHS[1]);
             expect(detectedPath).toEqual(DEFAULT_PATHS[1]);
@@ -92,6 +92,7 @@ describe('Gpg', () => {
                     stderr: null,
                     stdin: null,
                     stdout: null
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any);
             gpg = new Gpg('gpg', spawnFn);
             const result = gpg.spawn();

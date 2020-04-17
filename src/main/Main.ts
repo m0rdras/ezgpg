@@ -3,12 +3,12 @@ import { ipcMain, IpcMainEvent } from 'electron';
 import ElectronStore from 'electron-store';
 
 import { Events, StoreKeys } from '../Constants';
-import { ISettings } from '../stores/SettingsStore';
+import { Settings } from '../stores/SettingsStore';
 import Gpg from './Gpg';
 
 const log = debug('ezgpg:main');
 
-export interface IRequestCryptData {
+export interface RequestCryptData {
     text: string;
     recipients: readonly string[];
 }
@@ -68,10 +68,7 @@ export default class Main {
         }
     }
 
-    async onRequestCrypt(
-        event: Electron.IpcMainEvent,
-        data: IRequestCryptData
-    ) {
+    async onRequestCrypt(event: Electron.IpcMainEvent, data: RequestCryptData) {
         const { text, recipients } = data;
         if (Gpg.isEncrypted(text)) {
             event.reply(Events.CRYPT_RESULT, {
@@ -94,7 +91,7 @@ export default class Main {
         event.reply(Events.LOAD_SETTINGS_RESULT, settings);
     }
 
-    onSaveSettings(event: IpcMainEvent, settings: ISettings) {
+    onSaveSettings(event: IpcMainEvent, settings: Settings) {
         try {
             this.applySettings(settings);
             log('saving', settings);
@@ -110,7 +107,7 @@ export default class Main {
         }
     }
 
-    applySettings(settings: ISettings) {
+    applySettings(settings: Settings) {
         if (settings?.gpgPath) {
             log('Applying settings: %O', settings);
             if (!this.gpg.setExecutablePath(settings.gpgPath)) {

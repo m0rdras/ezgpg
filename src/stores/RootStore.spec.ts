@@ -5,7 +5,7 @@ import { Events } from '../Constants';
 import createRootStore, { RootStore } from './RootStore';
 
 type SendMockFn = jest.MockedFunction<
-    (channel: string, ...args: any[]) => void
+    (channel: string, ...args: unknown[]) => void
 >;
 
 jest.mock('electron');
@@ -62,7 +62,7 @@ describe('RootStore', () => {
 
     it('should be destructible', () => {
         const store = createStore();
-        destroy(store);
+        expect(() => destroy(store)).not.toThrow();
     });
 
     it('should initialize loading of sub-stores', () => {

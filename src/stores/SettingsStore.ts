@@ -4,13 +4,13 @@ import { getEnv, Instance, types } from 'mobx-state-tree';
 
 import { Events } from '../Constants';
 
-export interface ISettings {
+export interface Settings {
     gpgPath: string;
 }
 
-export interface ISaveSettingsResponse {
+export interface SaveSettingsResponse {
     error?: Error;
-    settings: ISettings;
+    settings: Settings;
 }
 
 const log = debug('ezgpg:settingsStore');
@@ -27,7 +27,7 @@ export const SettingsStore = types
 
         onSaveSettings(
             event: IpcRendererEvent,
-            response: ISaveSettingsResponse
+            response: SaveSettingsResponse
         ) {
             log(
                 'Save result: Error=%s - Settings=%O',
@@ -42,7 +42,7 @@ export const SettingsStore = types
             self.lastError = response.error?.message;
         },
 
-        onLoadSettings(event: IpcRendererEvent, settings: ISettings) {
+        onLoadSettings(event: IpcRendererEvent, settings: Settings) {
             if (settings?.gpgPath) {
                 self.gpgPath = settings.gpgPath;
             }
@@ -69,4 +69,4 @@ export const SettingsStore = types
             );
         }
     }));
-export interface ISettingsStore extends Instance<typeof SettingsStore> {}
+export type ISettingsStore = Instance<typeof SettingsStore>;

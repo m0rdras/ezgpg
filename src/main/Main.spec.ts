@@ -4,6 +4,7 @@ import ElectronStore from 'electron-store';
 import { Events, StoreKeys } from '../Constants';
 import Gpg, { GpgError } from './Gpg';
 import Main from './Main';
+import { Settings } from '../stores/SettingsStore';
 
 jest.mock('electron-store');
 jest.mock('./Gpg');
@@ -22,8 +23,9 @@ describe('Main', () => {
             set: jest
                 .fn()
                 .mockImplementation((key, val) => (mockSettings = val))
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
-        // eslint-disable-next-line no-underscore-dangle
+        // eslint-disable-next-line no-underscore-dangle,@typescript-eslint/no-explicit-any
         (mockGpg as any).__setEncrypted(false);
     });
 
@@ -34,13 +36,12 @@ describe('Main', () => {
 
     describe('after setup', () => {
         let mockEvent: IpcMainEvent;
-        type TEventHandler = (channel: string, ...args: any) => void;
-        let mockReply: jest.MockContext<TEventHandler, any[]>;
+        let mockReply: jest.Mock;
 
         beforeEach(() => {
-            const reply = jest.fn();
-            mockReply = reply.mock as any;
-            mockEvent = { reply } as any;
+            mockReply = jest.fn();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            mockEvent = { reply: mockReply } as any;
 
             main = Main.setup(mockGpg, mockStore);
         });
@@ -138,26 +139,25 @@ describe('Main', () => {
 
                 await main.onRequestPubKeys(mockEvent);
 
-                expect(mockReply.calls).toHaveLength(1);
-                expect(mockReply.calls[0]).toEqual([
-                    Events.PUBKEYS_RESULT,
-                    { pubKeys: ['alpha', 'beta'] }
-                ]);
+                expect(mockReply).toHaveBeenCalledTimes(1);
+                expect(mockReply).toHaveBeenCalledWith(Events.PUBKEYS_RESULT, {
+                    pubKeys: ['alpha', 'beta']
+                });
             });
 
             it('handles request for public keys when gpg errors', async () => {
                 const expectedError = new GpgError(2, 'error');
-                (mockGpg.getPublicKeys as any).mockImplementation(() => {
+                (mockGpg.getPublicKeys as jest.Mock).mockImplementation(() => {
                     throw expectedError;
                 });
 
                 await main.onRequestPubKeys(mockEvent);
 
-                expect(mockReply.calls).toHaveLength(1);
-                expect(mockReply.calls[0]).toEqual([
-                    Events.PUBKEYS_RESULT,
-                    { pubKeys: [], error: expectedError }
-                ]);
+                expect(mockReply).toHaveBeenCalledTimes(1);
+                expect(mockReply).toHaveBeenCalledWith(Events.PUBKEYS_RESULT, {
+                    pubKeys: [],
+                    error: expectedError
+                });
             });
         });
 
@@ -197,7 +197,7 @@ describe('Main', () => {
 
         describe('onRequestCrypt', () => {
             it('encrypts unencrypted text', async () => {
-                (mockGpg.encrypt as any).mockImplementation(() => {
+                (mockGpg.encrypt as jest.Mock).mockImplementation(() => {
                     return Promise.resolve('ENCRYPTED');
                 });
 
@@ -206,17 +206,17 @@ describe('Main', () => {
                     text: 'foobar'
                 });
 
-                expect(mockReply.calls).toHaveLength(1);
-                expect(mockReply.calls[0]).toEqual([
-                    Events.CRYPT_RESULT,
-                    { encrypted: true, text: 'ENCRYPTED' }
-                ]);
+                expect(mockReply).toHaveBeenCalledTimes(1);
+                expect(mockReply).toHaveBeenCalledWith(Events.CRYPT_RESULT, {
+                    encrypted: true,
+                    text: 'ENCRYPTED'
+                });
             });
 
             it('decrypts encrypted text', async () => {
-                // eslint-disable-next-line no-underscore-dangle
+                // eslint-disable-next-line no-underscore-dangle,@typescript-eslint/no-explicit-any
                 (mockGpg as any).__setEncrypted(true);
-                (mockGpg.decrypt as any).mockImplementation(() => {
+                (mockGpg.decrypt as jest.Mock).mockImplementation(() => {
                     return Promise.resolve('DECRYPTED');
                 });
 
@@ -225,11 +225,11 @@ describe('Main', () => {
                     text: 'foobar'
                 });
 
-                expect(mockReply.calls).toHaveLength(1);
-                expect(mockReply.calls[0]).toEqual([
-                    Events.CRYPT_RESULT,
-                    { encrypted: false, text: 'DECRYPTED' }
-                ]);
+                expect(mockReply).toHaveBeenCalledTimes(1);
+                expect(mockReply).toHaveBeenCalledWith(Events.CRYPT_RESULT, {
+                    encrypted: false,
+                    text: 'DECRYPTED'
+                });
             });
 
             it('handles empty text', async () => {
@@ -238,11 +238,11 @@ describe('Main', () => {
                     text: ''
                 });
 
-                expect(mockReply.calls).toHaveLength(1);
-                expect(mockReply.calls[0]).toEqual([
-                    Events.CRYPT_RESULT,
-                    { encrypted: false, text: '' }
-                ]);
+                expect(mockReply).toHaveBeenCalledTimes(1);
+                expect(mockReply).toHaveBeenCalledWith(Events.CRYPT_RESULT, {
+                    encrypted: false,
+                    text: ''
+                });
             });
 
             it('handles empty recipient list', async () => {
@@ -251,11 +251,11 @@ describe('Main', () => {
                     text: 'encrypt me plz!'
                 });
 
-                expect(mockReply.calls).toHaveLength(1);
-                expect(mockReply.calls[0]).toEqual([
-                    Events.CRYPT_RESULT,
-                    { encrypted: false, text: '' }
-                ]);
+                expect(mockReply).toHaveBeenCalledTimes(1);
+                expect(mockReply).toHaveBeenCalledWith(Events.CRYPT_RESULT, {
+                    encrypted: false,
+                    text: ''
+                });
             });
         });
 
@@ -289,7 +289,7 @@ describe('Main', () => {
             it('does not try to apply empty settings', () => {
                 const gpgPath = (mockGpg.gpgPath = '/foo');
 
-                main.applySettings(undefined as any);
+                main.applySettings({} as Settings);
 
                 expect(mockGpg.gpgPath).toEqual(gpgPath);
             });

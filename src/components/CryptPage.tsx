@@ -6,11 +6,11 @@ import { IRootStore } from '../stores/RootStore';
 import CryptTextArea from './CryptTextArea';
 import RecipientDropdown from './RecipientDropdown';
 
-interface ICryptPageProps {
+interface CryptPageProps {
     cryptStore: IRootStore;
 }
 
-const CryptPage: React.FC<ICryptPageProps> = observer(({ cryptStore }) => {
+const CryptPage: React.FC<CryptPageProps> = observer(({ cryptStore }) => {
     const { output, input } = cryptStore.cryptStore;
 
     return (

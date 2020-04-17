@@ -3,13 +3,13 @@ import { observer } from 'mobx-react-lite';
 import { IGpgKey } from '../stores/GpgKeyStore';
 import { Table } from 'semantic-ui-react';
 
-interface IKeysTableProps {
+interface KeysTableProps {
     keys: IGpgKey[];
     selectedId?: string;
     onSelectKey: (keyId: string) => void;
 }
 
-const KeysTable: React.FC<IKeysTableProps> = observer(
+const KeysTable: React.FC<KeysTableProps> = observer(
     ({ keys, selectedId, onSelectKey }) => {
         const rows = keys.map((key) => (
             <Table.Row

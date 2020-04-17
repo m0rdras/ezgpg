@@ -6,11 +6,11 @@ import { IGpgKeyStore } from '../stores/GpgKeyStore';
 import KeysTable from './KeysTable';
 import KeysMenu from './KeysMenu';
 
-interface IKeysPageProps {
+interface KeysPageProps {
     keyStore: IGpgKeyStore;
 }
 
-const KeysPage: React.FC<IKeysPageProps> = observer(({ keyStore }) => {
+const KeysPage: React.FC<KeysPageProps> = observer(({ keyStore }) => {
     const [selectedId, setSelectedId] = useState<string | undefined>();
 
     const selectKey = (keyId: string) => {

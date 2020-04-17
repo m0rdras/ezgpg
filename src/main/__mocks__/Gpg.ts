@@ -13,6 +13,7 @@ const mock = jest.fn().mockImplementation(() => {
         }
     };
 });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (mock as any).isEncrypted = jest.fn().mockImplementation(() => __encrypted);
 
 export const GpgError = jest

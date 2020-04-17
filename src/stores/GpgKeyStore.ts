@@ -10,7 +10,7 @@ export const GpgKey = types.model('GpgKey', {
     id: types.identifier,
     name: types.maybe(types.string)
 });
-export interface IGpgKey extends Instance<typeof GpgKey> {}
+export type IGpgKey = Instance<typeof GpgKey>;
 
 export const GpgKeyStore = types
     .model('GpgKeyStore', {
@@ -96,4 +96,4 @@ export const GpgKeyStore = types
         }
     }));
 
-export interface IGpgKeyStore extends Instance<typeof GpgKeyStore> {}
+export type IGpgKeyStore = Instance<typeof GpgKeyStore>;

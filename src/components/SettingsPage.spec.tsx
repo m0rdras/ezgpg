@@ -14,6 +14,7 @@ describe('SettingsPage', () => {
             gpgPath: '/foo/bar/gpg',
             save: jest.fn(),
             setGpgPath: jest.fn()
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
     });
 
@@ -42,6 +43,7 @@ describe('SettingsPage', () => {
             type ChangeHandler = (newPath: string) => Promise<void>;
             const changeHandler: ChangeHandler = pathInput.prop(
                 'onChange'
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ) as any;
             expect(changeHandler).not.toBeUndefined();
 

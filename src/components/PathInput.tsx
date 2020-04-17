@@ -5,13 +5,13 @@ import { Button, Form, Input } from 'semantic-ui-react';
 
 const { dialog } = Electron.remote;
 
-interface IPathInputProps {
+interface PathInputProps {
     path: string;
     label: string;
     onChange: (path: string) => void;
 }
 
-const PathInput: React.FC<IPathInputProps> = observer(
+const PathInput: React.FC<PathInputProps> = observer(
     ({ path, label, onChange }) => {
         const onSelectFileButtonClick = () => {
             const fileName = dialog.showOpenDialogSync({

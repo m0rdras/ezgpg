@@ -61,7 +61,7 @@ export default class Gpg {
         if (this.gpgPath.length === 0) {
             return Promise.reject(new Error('gpg executable path not set'));
         }
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let stdout = '';
             let stderr = '';
 
@@ -80,6 +80,7 @@ export default class Gpg {
                 }
 
                 child.stderr.on('data', (data) => (stderr += data));
+                child.stdout.on('data', (data) => (stdout += data));
 
                 child.on('close', (code) =>
                     code === 0
@@ -91,10 +92,6 @@ export default class Gpg {
 
                 if (input) {
                     child.stdin.end(input);
-                }
-
-                for await (const data of child.stdout) {
-                    stdout += data;
                 }
             } catch (err) {
                 log('Unknown error while spawning GPG: %O', err);

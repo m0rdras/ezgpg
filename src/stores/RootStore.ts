@@ -42,7 +42,7 @@ export const RootStore = types
             }
         };
     });
-export interface IRootStore extends Instance<typeof RootStore> {}
+export type IRootStore = Instance<typeof RootStore>;
 
 export default function createRootStore(ipc = ipcRenderer) {
     const snapshot: SnapshotIn<typeof RootStore> = {

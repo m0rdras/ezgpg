@@ -4,12 +4,12 @@ import { Button, Confirm, Icon } from 'semantic-ui-react';
 
 import { IGpgKeyStore } from '../stores/GpgKeyStore';
 
-interface IKeysMenuProps {
+interface KeysMenuProps {
     keyStore: IGpgKeyStore;
     selectedId?: string;
 }
 
-const KeysMenu: React.FC<IKeysMenuProps> = observer(
+const KeysMenu: React.FC<KeysMenuProps> = observer(
     ({ keyStore, selectedId }) => {
         const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 

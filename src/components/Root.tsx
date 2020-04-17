@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { hot } from 'react-hot-loader';
 import { MemoryRouter as Router, Route, Switch } from 'react-router-dom';
@@ -9,11 +10,11 @@ import KeysPage from './KeysPage';
 import MenuBar from './MenuBar';
 import SettingsPage from './SettingsPage';
 
-interface IRootProps {
+interface RootProps {
     store: IRootStore;
 }
 
-const Root: React.FC<IRootProps> = ({ store }) => {
+const Root: React.FC<RootProps> = observer(({ store }) => {
     return (
         <Router>
             <div>
@@ -34,6 +35,6 @@ const Root: React.FC<IRootProps> = ({ store }) => {
             </div>
         </Router>
     );
-};
+});
 
 export default hot(module)(Root);

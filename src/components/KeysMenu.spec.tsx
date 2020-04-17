@@ -13,6 +13,7 @@ describe('KeysMenu', () => {
             sortedKeys: [{ id: 'key-id', name: 'foo', email: 'bar' }],
             load: jest.fn(),
             deleteKey: jest.fn()
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
     });
 

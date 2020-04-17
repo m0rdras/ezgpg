@@ -10,7 +10,7 @@ export const IOText = types
             self.val = text;
         }
     }));
-export interface IIOText extends Instance<typeof IOText> {}
+export type IIOText = Instance<typeof IOText>;
 
 export const CryptStore = types
     .model('CryptStore', {
@@ -44,4 +44,4 @@ export const CryptStore = types
             }
         };
     });
-export interface ICryptStore extends Instance<typeof CryptStore> {}
+export type ICryptStore = Instance<typeof CryptStore>;

@@ -42,11 +42,10 @@ describe('PathInput', () => {
             );
 
             btn = wrapper.find('Button');
-            expect(btn).toHaveLength(1);
         });
 
         it('should accept file paths from dialog', () => {
-            (dialog.showOpenDialogSync as any).mockReturnValue(['/foo']);
+            (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['/foo']);
 
             btn.simulate('click');
 
@@ -54,7 +53,7 @@ describe('PathInput', () => {
         });
 
         it('should handle cancelled file selection', () => {
-            (dialog.showOpenDialogSync as any).mockReturnValue(undefined);
+            (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(undefined);
 
             btn.simulate('click');
 

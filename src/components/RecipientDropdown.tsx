@@ -4,11 +4,11 @@ import { Dropdown, Form } from 'semantic-ui-react';
 
 import { IGpgKeyStore } from '../stores/GpgKeyStore';
 
-interface IRecipientDropdownProps {
+interface RecipientDropdownProps {
     keyStore: IGpgKeyStore;
 }
 
-const RecipientDropdown: React.FC<IRecipientDropdownProps> = observer(
+const RecipientDropdown: React.FC<RecipientDropdownProps> = observer(
     ({ keyStore }) => {
         const recipients = keyStore.sortedKeys.map((el) => ({
             key: el.id,

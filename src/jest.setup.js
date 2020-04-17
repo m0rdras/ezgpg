@@ -1,7 +1,6 @@
-const Enzyme = require('enzyme');
-const EnzymeAdapter = require('enzyme-adapter-react-16');
-
-const { JSDOM } = require('jsdom');
+import Enzyme from 'enzyme';
+import EnzymeAdapter from 'enzyme-adapter-react-16';
+import { JSDOM } from 'jsdom';
 
 const jsdom = new JSDOM('<!doctype html><html lang="en"><body></body></html>');
 const { window } = jsdom;

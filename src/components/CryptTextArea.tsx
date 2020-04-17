@@ -5,13 +5,13 @@ import { Form, TextArea } from 'semantic-ui-react';
 import Gpg from '../main/Gpg';
 import { IIOText } from '../stores/CryptStore';
 
-interface ICryptTextAreaProps {
+interface CryptTextAreaProps {
     label?: string;
     readOnly?: boolean;
     text: IIOText;
 }
 
-const CryptTextArea: React.FC<ICryptTextAreaProps> = observer(
+const CryptTextArea: React.FC<CryptTextAreaProps> = observer(
     ({ label, readOnly, text }) => {
         return (
             <Form.Field>

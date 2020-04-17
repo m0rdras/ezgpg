@@ -55,12 +55,14 @@ describe('SettingsStore', () => {
     });
 
     it('handles load event response', () => {
-        store.onLoadSettings(undefined as any, { gpgPath: '/bar' });
+        store.onLoadSettings({} as Electron.IpcRendererEvent, {
+            gpgPath: '/bar'
+        });
         expect(store.gpgPath).toEqual('/bar');
     });
 
     it('handles save event response without error', () => {
-        store.onSaveSettings(undefined as any, {
+        store.onSaveSettings({} as Electron.IpcRendererEvent, {
             settings: { gpgPath: '/foobar' }
         });
         expect(store.gpgPath).toEqual('/foobar');
@@ -74,14 +76,14 @@ describe('SettingsStore', () => {
             },
             deps
         );
-        store.onSaveSettings(undefined as any, {
+        store.onSaveSettings({} as Electron.IpcRendererEvent, {
             settings: { gpgPath: '/foobar' }
         });
         expect(store.lastError).toBeUndefined();
     });
 
     it('handles errors in save settings response', () => {
-        store.onSaveSettings(undefined as any, {
+        store.onSaveSettings({} as Electron.IpcRendererEvent, {
             error: new Error('😱'),
             settings: { gpgPath: '/foobar' }
         });
