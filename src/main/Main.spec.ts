@@ -23,6 +23,7 @@ describe('Main', () => {
                 .fn()
                 .mockImplementation((key, val) => (mockSettings = val))
         } as any;
+        // eslint-disable-next-line no-underscore-dangle
         (mockGpg as any).__setEncrypted(false);
     });
 
@@ -33,10 +34,8 @@ describe('Main', () => {
 
     describe('after setup', () => {
         let mockEvent: IpcMainEvent;
-        let mockReply: jest.MockContext<
-            (channel: string, ...args: any) => void,
-            any[]
-        >;
+        type TEventHandler = (channel: string, ...args: any) => void;
+        let mockReply: jest.MockContext<TEventHandler, any[]>;
 
         beforeEach(() => {
             const reply = jest.fn();
@@ -215,6 +214,7 @@ describe('Main', () => {
             });
 
             it('decrypts encrypted text', async () => {
+                // eslint-disable-next-line no-underscore-dangle
                 (mockGpg as any).__setEncrypted(true);
                 (mockGpg.decrypt as any).mockImplementation(() => {
                     return Promise.resolve('DECRYPTED');

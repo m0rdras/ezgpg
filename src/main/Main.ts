@@ -14,7 +14,7 @@ export interface IRequestCryptData {
 }
 
 export default class Main {
-    static initGpgPath(gpg: Gpg, store: ElectronStore) {
+    static initGpgPath = (gpg: Gpg, store: ElectronStore) => {
         const settings = store.get(StoreKeys.SETTINGS, {});
         if (settings?.gpgPath) {
             if (!gpg.setExecutablePath(settings.gpgPath)) {
@@ -25,7 +25,7 @@ export default class Main {
         }
         store.set(StoreKeys.SETTINGS, settings);
         return settings;
-    }
+    };
 
     static setup(gpg = new Gpg(), store = new ElectronStore()): Main {
         log('Starting up main process');

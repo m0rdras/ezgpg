@@ -10,8 +10,8 @@ describe('RecipientDropdown', () => {
     const keyStore = GpgKeyStore.create(
         {
             gpgKeys: {
-                alpha: { id: 'alpha', name: 'foo', email: 'bar' },
-                beta: { id: 'beta', name: 'beeeta', email: 'beta@alpha.com' }
+                alpha: { id: 'alpha', name: 'alpha name' },
+                beta: { id: 'beta', email: 'bar@alpha.local' }
             },
             selectedKeys: []
         },
@@ -23,12 +23,12 @@ describe('RecipientDropdown', () => {
         expect(wrapper.find(Dropdown).prop('options')).toEqual([
             {
                 key: 'beta',
-                text: 'beeeta <beta@alpha.com>',
+                text: '[unnamed] <bar@alpha.local>',
                 value: 'beta'
             },
             {
                 key: 'alpha',
-                text: 'foo <bar>',
+                text: 'alpha name',
                 value: 'alpha'
             }
         ]);
@@ -38,7 +38,7 @@ describe('RecipientDropdown', () => {
         const wrapper = shallow(<RecipientDropdown keyStore={keyStore} />);
         wrapper.find(Dropdown).simulate('change', '', { value: ['alpha'] });
         expect(keyStore.selectedKeys).toEqual([
-            { id: 'alpha', name: 'foo', email: 'bar' }
+            { id: 'alpha', name: 'alpha name' }
         ]);
     });
 });

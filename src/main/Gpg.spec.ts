@@ -117,9 +117,8 @@ describe('Gpg', () => {
         let stdinStream: Writable;
         let stdoutStream: Readable;
         let stderrStream: Readable;
-        let closeHandler:
-            | ((code: number, signal: NodeJS.Signals) => void)
-            | undefined;
+        type TCloseHandler = (code: number, signal: NodeJS.Signals) => void;
+        let closeHandler: TCloseHandler | undefined;
         let eventHandler: (
             event: string,
             listener: (code: number, signal: NodeJS.Signals) => void
@@ -131,10 +130,12 @@ describe('Gpg', () => {
                 exitCode = 0;
                 gpgArgs = args;
                 stdoutStream = new Readable();
+                // eslint-disable-next-line no-underscore-dangle
                 stdoutStream._read = () => {
                     /* noop */
                 };
                 stderrStream = new Readable();
+                // eslint-disable-next-line no-underscore-dangle
                 stderrStream._read = () => {
                     /* noop */
                 };

@@ -18,18 +18,18 @@ export class GpgError extends Error {
 
 type SpawnFunction = (
     command: string,
-    args?: ReadonlyArray<string>,
+    args?: readonly string[],
     options?: SpawnOptions
 ) => ChildProcess;
 const defaultSpawnFn: SpawnFunction = spawn;
 
 export default class Gpg {
-    public static isEncrypted(text: string) {
+    public static isEncrypted = (text: string) => {
         return (
             text.search('-----BEGIN PGP MESSAGE-----') > -1 &&
             text.search('-----END PGP MESSAGE-----\n') > -1
         );
-    }
+    };
 
     constructor(
         public gpgPath: string = '',
@@ -131,7 +131,7 @@ export default class Gpg {
         return this.spawn(['--delete-keys', keyId]);
     }
 
-    private static parseGpgPubKeyOutput(str: string) {
+    private static parseGpgPubKeyOutput = (str: string) => {
         const lines = str.split('\n');
         assert(lines.length >= 4);
 
@@ -141,5 +141,5 @@ export default class Gpg {
         const email = matches?.[3];
 
         return { id, name, email };
-    }
+    };
 }

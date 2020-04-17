@@ -1,11 +1,13 @@
-import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { Confirm, Table } from 'semantic-ui-react';
 
-import { IGpgKeyStore } from '../stores/GpgKeyStore';
 import KeysPage from './KeysPage';
+import { IGpgKeyStore } from '../stores/GpgKeyStore';
+import KeysTable from './KeysTable';
+import { Table } from 'semantic-ui-react';
 
 describe('KeysPage', () => {
+    let wrapper: ReactWrapper<typeof KeysPage>;
     let keyStore: IGpgKeyStore;
 
     beforeEach(() => {
@@ -14,54 +16,25 @@ describe('KeysPage', () => {
             load: jest.fn(),
             deleteKey: jest.fn()
         } as any;
+
+        wrapper = mount(<KeysPage keyStore={keyStore} />);
     });
 
-    describe('shallowly rendered', () => {
-        let wrapper: ShallowWrapper<typeof KeysPage>;
+    afterEach(() => wrapper.unmount());
 
-        beforeEach(() => {
-            wrapper = shallow(<KeysPage keyStore={keyStore} />);
-        });
-
-        it('renders', () => {
-            expect(wrapper).toHaveLength(1);
-        });
-
-        it('reloads keys', () => {
-            wrapper.find('Button.reload-button').simulate('click');
-
-            expect(keyStore.load).toHaveBeenCalled();
-        });
+    it('renders', () => {
+        expect(wrapper).toHaveLength(1);
     });
 
-    describe('on deletion', () => {
-        let wrapper: ReactWrapper<typeof KeysPage>;
+    it('handles key selection', () => {
+        wrapper.find(Table.Row).last().simulate('click');
 
-        beforeEach(() => {
-            wrapper = mount(<KeysPage keyStore={keyStore} />);
-            wrapper.find(Table.Row).last().simulate('click');
-            wrapper.find('Button.delete-button').simulate('click');
-        });
+        expect(wrapper.find(KeysTable).prop('selectedId')).toEqual('key-id');
+    });
 
-        afterEach(() => {
-            wrapper.unmount();
-        });
+    it('handles key deselection', () => {
+        wrapper.find(Table.Row).last().simulate('click').simulate('click');
 
-        it('opens confirmation dialog', () => {
-            expect(wrapper.find(Confirm).prop('open')).toBe(true);
-        });
-
-        it('sends delete request after confirmation', () => {
-            wrapper.find('Confirm Button[primary=true]').simulate('click');
-
-            expect(wrapper.find(Confirm).prop('open')).toBe(false);
-            expect(keyStore.deleteKey).toHaveBeenCalledWith('key-id');
-        });
-
-        it('does not send delete request after cancelling', () => {
-            wrapper.find('Confirm Button[content="Cancel"]').simulate('click');
-
-            expect(keyStore.deleteKey).not.toHaveBeenCalled();
-        });
+        expect(wrapper.find(KeysTable).prop('selectedId')).toBeUndefined();
     });
 });
