@@ -70,9 +70,7 @@ describe('RootStore', () => {
 
         store.load();
 
-        expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(
-            Events.PUBKEYS
-        );
+        expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(Events.KEYS);
         expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(
             Events.LOAD_SETTINGS
         );

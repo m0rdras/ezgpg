@@ -25,8 +25,8 @@ describe('GpgKeyStore', () => {
     it('knows about all handlers', () => {
         store = createStore();
         expect(store.getHandlers()).toEqual([
-            [Events.PUBKEYS_RESULT, store.onGpgKeyResponse],
-            [Events.PUBKEY_DELETE, store.onDeleteKeyResponse]
+            [Events.KEYS_RESULT, store.onGpgKeyResponse],
+            [Events.KEY_DELETE, store.onDeleteKeyResponse]
         ]);
     });
 
@@ -35,11 +35,11 @@ describe('GpgKeyStore', () => {
 
         expect(deps.ipcRenderer.on).toHaveBeenCalledTimes(2);
         expect(deps.ipcRenderer.on).toHaveBeenCalledWith(
-            Events.PUBKEYS_RESULT,
+            Events.KEYS_RESULT,
             store.onGpgKeyResponse
         );
         expect(deps.ipcRenderer.on).toHaveBeenCalledWith(
-            Events.PUBKEY_DELETE,
+            Events.KEY_DELETE,
             store.onDeleteKeyResponse
         );
     });
@@ -50,11 +50,11 @@ describe('GpgKeyStore', () => {
 
         expect(deps.ipcRenderer.off).toHaveBeenCalledTimes(2);
         expect(deps.ipcRenderer.off).toHaveBeenCalledWith(
-            Events.PUBKEYS_RESULT,
+            Events.KEYS_RESULT,
             store.onGpgKeyResponse
         );
         expect(deps.ipcRenderer.off).toHaveBeenCalledWith(
-            Events.PUBKEY_DELETE,
+            Events.KEY_DELETE,
             store.onDeleteKeyResponse
         );
     });
@@ -63,7 +63,7 @@ describe('GpgKeyStore', () => {
         store = createStore();
         store.load();
 
-        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.PUBKEYS);
+        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.KEYS);
     });
 
     it('handles pubkey response correctly', () => {
@@ -141,7 +141,7 @@ describe('GpgKeyStore', () => {
         store.deleteKey('foo');
 
         expect(deps.ipcRenderer.send).toHaveBeenCalledWith(
-            Events.PUBKEY_DELETE,
+            Events.KEY_DELETE,
             'foo'
         );
     });
@@ -153,7 +153,7 @@ describe('GpgKeyStore', () => {
             keyId: 'foo'
         });
 
-        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.PUBKEYS);
+        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.KEYS);
     });
 
     it('handles unsuccessful delete key response', () => {
@@ -164,6 +164,6 @@ describe('GpgKeyStore', () => {
             error: new Error('fail')
         });
 
-        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.PUBKEYS);
+        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.KEYS);
     });
 });

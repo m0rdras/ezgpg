@@ -1,50 +1,60 @@
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
-import { Button, Confirm, Icon } from 'semantic-ui-react';
+import { Button, Confirm } from 'semantic-ui-react';
 
 import { IGpgKeyStore } from '../stores/GpgKeyStore';
+import KeyImportDialog from './KeyImportDialog';
 
 interface KeysMenuProps {
     keyStore: IGpgKeyStore;
     selectedId?: string;
 }
 
+enum DialogState {
+    None,
+    ConfirmDelete,
+    ImportKey
+}
+
 const KeysMenu: React.FC<KeysMenuProps> = observer(
     ({ keyStore, selectedId }) => {
-        const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+        const [dialogState, setDialogState] = useState(DialogState.None);
 
         const deleteKey = (keyId: string) => {
             keyStore.deleteKey(keyId);
-            setConfirmDialogOpen(false);
+            setDialogState(DialogState.None);
         };
 
         return (
             <>
                 <Button
                     onClick={() => keyStore.load()}
-                    icon
+                    icon='redo'
                     className='reload-button'
-                >
-                    <Icon name='redo' />
-                </Button>
-                <Button icon>
-                    <Icon name='plus' />
-                </Button>
+                />
                 <Button
-                    icon
+                    onClick={() => setDialogState(DialogState.ImportKey)}
+                    icon='plus'
+                />
+                <Button
+                    icon='trash'
                     disabled={!selectedId}
-                    onClick={() => setConfirmDialogOpen(true)}
+                    onClick={() => setDialogState(DialogState.ConfirmDelete)}
                     className='delete-button'
-                >
-                    <Icon name='trash' />
-                </Button>
+                />
 
                 <Confirm
-                    open={confirmDialogOpen}
+                    open={dialogState === DialogState.ConfirmDelete}
                     header='Delete Key'
                     content={`Are you sure you want to delete the key with id "${selectedId}"?`}
-                    onCancel={() => setConfirmDialogOpen(false)}
+                    onCancel={() => setDialogState(DialogState.None)}
                     onConfirm={() => selectedId && deleteKey(selectedId)}
+                />
+
+                <KeyImportDialog
+                    keyStore={keyStore}
+                    open={dialogState === DialogState.ImportKey}
+                    onClose={() => setDialogState(DialogState.None)}
                 />
             </>
         );

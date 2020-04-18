@@ -35,8 +35,8 @@ export const GpgKeyStore = types
     .actions((self) => ({
         getHandlers() {
             return [
-                [Events.PUBKEYS_RESULT, this.onGpgKeyResponse],
-                [Events.PUBKEY_DELETE, this.onDeleteKeyResponse]
+                [Events.KEYS_RESULT, this.onGpgKeyResponse],
+                [Events.KEY_DELETE, this.onDeleteKeyResponse]
             ];
         },
 
@@ -67,11 +67,16 @@ export const GpgKeyStore = types
 
         load() {
             log('requesting pub keys');
-            getEnv(self).ipcRenderer.send(Events.PUBKEYS);
+            getEnv(self).ipcRenderer.send(Events.KEYS);
         },
 
         deleteKey(id: string) {
-            getEnv(self).ipcRenderer.send(Events.PUBKEY_DELETE, id);
+            getEnv(self).ipcRenderer.send(Events.KEY_DELETE, id);
+        },
+
+        importKey(key: string) {
+            log('trying to import key: %s', key);
+            getEnv(self).ipcRenderer.send(Events.KEY_IMPORT, key);
         },
 
         onDeleteKeyResponse(

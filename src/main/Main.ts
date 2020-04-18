@@ -34,8 +34,9 @@ export default class Main {
 
         const main = new Main(gpg, store);
 
-        ipcMain.on(Events.PUBKEYS, main.onRequestPubKeys.bind(main));
-        ipcMain.on(Events.PUBKEY_DELETE, main.onDeletePubKey.bind(main));
+        ipcMain.on(Events.KEYS, main.onRequestPubKeys.bind(main));
+        ipcMain.on(Events.KEY_DELETE, main.onDeletePubKey.bind(main));
+        ipcMain.on(Events.KEY_IMPORT, main.onImportKey.bind(main));
         ipcMain.on(Events.CRYPT, main.onRequestCrypt.bind(main));
         ipcMain.on(Events.LOAD_SETTINGS, main.onLoadSettings.bind(main));
         ipcMain.on(Events.SAVE_SETTINGS, main.onSaveSettings.bind(main));
@@ -52,19 +53,30 @@ export default class Main {
         try {
             const pubKeys = await this.gpg.getPublicKeys();
             log('Found %d keys', pubKeys.length);
-            event.reply(Events.PUBKEYS_RESULT, { pubKeys });
+            event.reply(Events.KEYS_RESULT, { pubKeys });
         } catch (error) {
             log('Error while getting public keys: %O', error);
-            event.reply(Events.PUBKEYS_RESULT, { pubKeys: [], error });
+            event.reply(Events.KEYS_RESULT, { pubKeys: [], error });
         }
     }
 
     async onDeletePubKey(event: Electron.IpcMainEvent, keyId: string) {
         try {
             await this.gpg.deleteKey(keyId);
-            event.reply(Events.PUBKEY_DELETE, { keyId });
+            event.reply(Events.KEY_DELETE, { keyId });
         } catch (error) {
-            event.reply(Events.PUBKEY_DELETE, { keyId, error });
+            event.reply(Events.KEY_DELETE, { keyId, error });
+        }
+    }
+
+    async onImportKey(event: Electron.IpcMainEvent, key: string) {
+        try {
+            log('importing...');
+            const result = await this.gpg.importKey(key);
+            log(result);
+            event.reply(Events.KEY_IMPORT, {});
+        } catch (error) {
+            event.reply(Events.KEY_IMPORT, { error });
         }
     }
 

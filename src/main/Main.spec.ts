@@ -47,20 +47,32 @@ describe('Main', () => {
         });
 
         it('should have set up ipc events', () => {
-            const onMock = (ipcMain.on as jest.Mock).mock;
+            expect(ipcMain.on).toHaveBeenCalledTimes(6);
 
-            expect(ipcMain.on).toHaveBeenCalledTimes(5);
-
-            expect(onMock.calls[0][0]).toEqual(Events.PUBKEYS);
-            expect(onMock.calls[0][1]).toBeInstanceOf(Function);
-            expect(onMock.calls[1][0]).toEqual(Events.PUBKEY_DELETE);
-            expect(onMock.calls[1][1]).toBeInstanceOf(Function);
-            expect(onMock.calls[2][0]).toEqual(Events.CRYPT);
-            expect(onMock.calls[2][1]).toBeInstanceOf(Function);
-            expect(onMock.calls[3][0]).toEqual(Events.LOAD_SETTINGS);
-            expect(onMock.calls[3][1]).toBeInstanceOf(Function);
-            expect(onMock.calls[4][0]).toEqual(Events.SAVE_SETTINGS);
-            expect(onMock.calls[4][1]).toBeInstanceOf(Function);
+            expect(ipcMain.on).toHaveBeenCalledWith(
+                Events.KEYS,
+                expect.anything()
+            );
+            expect(ipcMain.on).toHaveBeenCalledWith(
+                Events.KEY_DELETE,
+                expect.anything()
+            );
+            expect(ipcMain.on).toHaveBeenCalledWith(
+                Events.KEY_IMPORT,
+                expect.anything()
+            );
+            expect(ipcMain.on).toHaveBeenCalledWith(
+                Events.CRYPT,
+                expect.anything()
+            );
+            expect(ipcMain.on).toHaveBeenCalledWith(
+                Events.LOAD_SETTINGS,
+                expect.anything()
+            );
+            expect(ipcMain.on).toHaveBeenCalledWith(
+                Events.SAVE_SETTINGS,
+                expect.anything()
+            );
         });
 
         describe('gpg path handling', () => {
@@ -140,7 +152,7 @@ describe('Main', () => {
                 await main.onRequestPubKeys(mockEvent);
 
                 expect(mockReply).toHaveBeenCalledTimes(1);
-                expect(mockReply).toHaveBeenCalledWith(Events.PUBKEYS_RESULT, {
+                expect(mockReply).toHaveBeenCalledWith(Events.KEYS_RESULT, {
                     pubKeys: ['alpha', 'beta']
                 });
             });
@@ -154,7 +166,7 @@ describe('Main', () => {
                 await main.onRequestPubKeys(mockEvent);
 
                 expect(mockReply).toHaveBeenCalledTimes(1);
-                expect(mockReply).toHaveBeenCalledWith(Events.PUBKEYS_RESULT, {
+                expect(mockReply).toHaveBeenCalledWith(Events.KEYS_RESULT, {
                     pubKeys: [],
                     error: expectedError
                 });
@@ -170,7 +182,7 @@ describe('Main', () => {
                 await main.onDeletePubKey(mockEvent, 'key-id');
 
                 expect(mockEvent.reply).toHaveBeenCalledWith(
-                    Events.PUBKEY_DELETE,
+                    Events.KEY_DELETE,
                     {
                         keyId: 'key-id'
                     }
@@ -186,7 +198,7 @@ describe('Main', () => {
                 await main.onDeletePubKey(mockEvent, 'key-id');
 
                 expect(mockEvent.reply).toHaveBeenCalledWith(
-                    Events.PUBKEY_DELETE,
+                    Events.KEY_DELETE,
                     {
                         keyId: 'key-id',
                         error

@@ -128,6 +128,10 @@ export default class Gpg {
         return this.spawn(['--delete-keys', keyId]);
     }
 
+    public async importKey(key: string) {
+        return this.spawn(['--import'], key);
+    }
+
     private static parseGpgPubKeyOutput = (str: string) => {
         const lines = str.split('\n');
         assert(lines.length >= 4);
