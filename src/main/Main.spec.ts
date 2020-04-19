@@ -143,7 +143,7 @@ describe('Main', () => {
                     }
                 );
 
-                const response = await main.onRequestPubKeys(mockEvent);
+                const response = await main.onRequestPubKeys();
 
                 expect(response).toEqual({ pubKeys: ['alpha', 'beta'] });
             });
@@ -154,7 +154,7 @@ describe('Main', () => {
                     throw expectedError;
                 });
 
-                const response = await main.onRequestPubKeys(mockEvent);
+                const response = await main.onRequestPubKeys();
 
                 expect(response).toEqual({
                     pubKeys: [],
@@ -255,7 +255,7 @@ describe('Main', () => {
             it('loads from store', () => {
                 (mockStore.get as jest.Mock).mockReturnValue('settings');
 
-                const response = main.onLoadSettings(mockEvent);
+                const response = main.onLoadSettings();
 
                 expect(mockStore.get as jest.Mock).toHaveBeenCalledWith(
                     StoreKeys.SETTINGS
