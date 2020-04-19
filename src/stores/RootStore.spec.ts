@@ -1,78 +1,72 @@
-import { ipcRenderer } from 'electron';
-import { destroy } from 'mobx-state-tree';
-
 import { Events } from '../Constants';
-import createRootStore, { RootStore } from './RootStore';
-
-type SendMockFn = jest.MockedFunction<
-    (channel: string, ...args: unknown[]) => void
->;
-
-jest.mock('electron');
+import createRootStore, { IRootStore, RootStore } from './RootStore';
 
 describe('RootStore', () => {
-    const createStore = () => {
-        return RootStore.create(
-            {
-                cryptStore: {
-                    input: {
-                        val: 'input'
-                    },
-                    output: {
-                        val: 'output'
-                    },
-                    pending: false
-                },
-                gpgKeyStore: {
-                    gpgKeys: {
-                        alpha: {
-                            email: 'alpha@user.com',
-                            id: 'alpha',
-                            name: 'alpha user'
-                        }
-                    },
-                    selectedKeys: ['alpha']
-                },
-                settingsStore: {
-                    gpgPath: '/foo/bar/gpg'
-                }
-            },
-            {
-                ipcRenderer
-            }
-        );
-    };
+    let ipcRendererMock: { invoke: jest.Mock };
+    let rootStore: IRootStore;
 
-    it('should send input for crypt', () => {
-        createStore();
-        expect((ipcRenderer.send as SendMockFn).mock.calls[0]).toEqual([
-            Events.CRYPT,
-            {
-                recipients: ['alpha'],
-                text: 'input'
-            }
-        ]);
+    beforeEach(() => {
+        ipcRendererMock = { invoke: jest.fn() };
+        ipcRendererMock.invoke.mockReturnValue(
+            Promise.resolve({ text: '', pubKeys: [] })
+        );
     });
 
     it('should be created by factory function', () => {
-        const store = createRootStore(ipcRenderer);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const store = createRootStore(ipcRendererMock as any);
         expect(store.gpgKeyStore).toBeDefined();
         expect(store.cryptStore).toBeDefined();
     });
 
-    it('should be destructible', () => {
-        const store = createStore();
-        expect(() => destroy(store)).not.toThrow();
-    });
+    describe('without factory function', () => {
+        beforeEach(() => {
+            rootStore = RootStore.create(
+                {
+                    cryptStore: {
+                        input: {
+                            val: 'input'
+                        },
+                        output: {
+                            val: 'output'
+                        },
+                        pending: false
+                    },
+                    gpgKeyStore: {
+                        gpgKeys: {
+                            alpha: {
+                                email: 'alpha@user.com',
+                                id: 'alpha',
+                                name: 'alpha user'
+                            }
+                        },
+                        selectedKeys: []
+                    },
+                    settingsStore: {
+                        gpgPath: '/foo/bar/gpg'
+                    }
+                },
+                {
+                    ipcRenderer: ipcRendererMock
+                }
+            );
+            rootStore.gpgKeyStore.setSelectedKeys(['alpha']);
+        });
 
-    it('should initialize loading of sub-stores', () => {
-        const store = createStore();
+        it('should send input for crypt', () => {
+            expect(ipcRendererMock.invoke).toHaveBeenCalledWith(Events.CRYPT, {
+                recipients: ['alpha'],
+                text: 'input'
+            });
+        });
 
-        store.load();
+        it('should initialize loading of sub-stores', async () => {
+            await rootStore.load();
 
-        expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(Events.KEYS);
-        expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(
-            Events.LOAD_SETTINGS
-        );
+            expect(ipcRendererMock.invoke).toHaveBeenCalledWith(Events.KEYS);
+            expect(ipcRendererMock.invoke).toHaveBeenCalledWith(
+                Events.LOAD_SETTINGS
+            );
+        });
     });
 });

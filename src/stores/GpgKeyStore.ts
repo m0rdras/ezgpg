@@ -1,7 +1,7 @@
 import debug from 'debug';
-import { getEnv, Instance, types } from 'mobx-state-tree';
+import { flow, getEnv, Instance, types } from 'mobx-state-tree';
 
-import { Events } from '../Constants';
+import { DeleteKeyResponse, Events, KeysResponse } from '../Constants';
 
 const log = debug('ezgpg:gpgKeyStore');
 
@@ -33,63 +33,39 @@ export const GpgKeyStore = types
         }
     }))
     .actions((self) => ({
-        getHandlers() {
-            return [
-                [Events.KEYS_RESULT, this.onGpgKeyResponse],
-                [Events.KEY_DELETE, this.onDeleteKeyResponse]
-            ];
-        },
-
-        afterCreate() {
-            this.getHandlers().forEach(([channel, handler]) =>
-                getEnv(self).ipcRenderer.on(channel, handler)
+        load: flow(function* load() {
+            log('requesting pub keys');
+            const renderer = getEnv(self).ipcRenderer;
+            const { pubKeys, error }: KeysResponse = yield renderer.invoke(
+                Events.KEYS
             );
-        },
-
-        beforeDestroy() {
-            this.getHandlers().forEach(([channel, handler]) =>
-                getEnv(self).ipcRenderer.off(channel, handler)
-            );
-        },
-
-        onGpgKeyResponse(
-            event: Electron.IpcRendererEvent,
-            { pubKeys, error }: { pubKeys: IGpgKey[]; error?: Error }
-        ) {
+            self.selectedKeys.clear();
             self.gpgKeys.clear();
             if (error) {
                 log('Error while getting pub keys: %O', error);
-                return;
             }
-            log('received %d pub keys: %O', pubKeys.length, pubKeys);
             pubKeys.forEach((key) => self.gpgKeys.put(key));
-        },
+        }),
 
-        load() {
-            log('requesting pub keys');
-            getEnv(self).ipcRenderer.send(Events.KEYS);
-        },
-
-        deleteKey(id: string) {
-            getEnv(self).ipcRenderer.send(Events.KEY_DELETE, id);
-        },
-
-        importKey(key: string) {
-            log('trying to import key: %s', key);
-            getEnv(self).ipcRenderer.send(Events.KEY_IMPORT, key);
-        },
-
-        onDeleteKeyResponse(
-            event: Electron.IpcRendererEvent,
-            { keyId, error }: { keyId: string; error?: Error }
-        ) {
+        deleteKey: flow(function* deleteKey(id: string) {
+            const renderer = getEnv(self).ipcRenderer;
+            const { keyId, error }: DeleteKeyResponse = yield renderer.invoke(
+                Events.KEY_DELETE,
+                id
+            );
             if (error) {
                 log('Error while deleting key %s: %O', keyId, error);
             } else {
+                self.selectedKeys.clear();
+                self.gpgKeys.delete(keyId);
                 log('Deleted key %s', keyId);
             }
-            this.load();
-        },
+        }),
+
+        importKey: flow(function* importKey(key: string) {
+            log('trying to import key: %s', key);
+            yield getEnv(self).ipcRenderer.invoke(Events.KEY_IMPORT, key);
+        }),
 
         setSelectedKeys(names: string[]) {
             self.selectedKeys.clear();

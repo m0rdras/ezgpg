@@ -3,7 +3,7 @@ import { ipcRenderer } from 'electron';
 import { autorun, IReactionDisposer } from 'mobx';
 import { getEnv, Instance, SnapshotIn, types } from 'mobx-state-tree';
 
-import { Events } from '../Constants';
+import { CryptResponse, Events } from '../Constants';
 import { CryptStore } from './CryptStore';
 import { GpgKeyStore } from './GpgKeyStore';
 import { SettingsStore } from './SettingsStore';
@@ -19,20 +19,26 @@ export const RootStore = types
     .actions((self) => {
         let disposer: IReactionDisposer;
 
-        const onInputChange = () => {
+        const onInputChange = async () => {
             const payload = {
                 recipients: self.gpgKeyStore.selectedKeyIds,
                 text: self.cryptStore.input.val
             };
             log('Sending to main: %O', payload);
             self.cryptStore.setPending(true);
-            getEnv(self).ipcRenderer.send(Events.CRYPT, payload);
+            const { text }: CryptResponse = await getEnv(
+                self
+            ).ipcRenderer.invoke(Events.CRYPT, payload);
+            self.cryptStore.output.setText(text);
+            self.cryptStore.setPending(false);
         };
 
         return {
             load() {
-                self.settingsStore.load();
-                self.gpgKeyStore.load();
+                return Promise.all([
+                    self.settingsStore.load(),
+                    self.gpgKeyStore.load()
+                ]);
             },
             afterCreate() {
                 disposer = autorun(() => onInputChange());

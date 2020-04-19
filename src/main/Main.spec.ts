@@ -1,4 +1,4 @@
-import { ipcMain, IpcMainEvent } from 'electron';
+import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import ElectronStore from 'electron-store';
 
 import { Events, StoreKeys } from '../Constants';
@@ -35,41 +35,38 @@ describe('Main', () => {
     });
 
     describe('after setup', () => {
-        let mockEvent: IpcMainEvent;
-        let mockReply: jest.Mock;
+        let mockEvent: IpcMainInvokeEvent;
 
         beforeEach(() => {
-            mockReply = jest.fn();
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            mockEvent = { reply: mockReply } as any;
-
+            mockEvent = {} as any;
             main = Main.setup(mockGpg, mockStore);
         });
 
         it('should have set up ipc events', () => {
-            expect(ipcMain.on).toHaveBeenCalledTimes(6);
+            expect(ipcMain.handle).toHaveBeenCalledTimes(6);
 
-            expect(ipcMain.on).toHaveBeenCalledWith(
+            expect(ipcMain.handle).toHaveBeenCalledWith(
                 Events.KEYS,
                 expect.anything()
             );
-            expect(ipcMain.on).toHaveBeenCalledWith(
+            expect(ipcMain.handle).toHaveBeenCalledWith(
                 Events.KEY_DELETE,
                 expect.anything()
             );
-            expect(ipcMain.on).toHaveBeenCalledWith(
+            expect(ipcMain.handle).toHaveBeenCalledWith(
                 Events.KEY_IMPORT,
                 expect.anything()
             );
-            expect(ipcMain.on).toHaveBeenCalledWith(
+            expect(ipcMain.handle).toHaveBeenCalledWith(
                 Events.CRYPT,
                 expect.anything()
             );
-            expect(ipcMain.on).toHaveBeenCalledWith(
+            expect(ipcMain.handle).toHaveBeenCalledWith(
                 Events.LOAD_SETTINGS,
                 expect.anything()
             );
-            expect(ipcMain.on).toHaveBeenCalledWith(
+            expect(ipcMain.handle).toHaveBeenCalledWith(
                 Events.SAVE_SETTINGS,
                 expect.anything()
             );
@@ -85,23 +82,20 @@ describe('Main', () => {
             });
 
             it('should reply with an error when invalid gpg path was given', () => {
-                mockStore.get = jest
-                    .fn()
-                    .mockReturnValue({ gpgPath: '/valid/path' });
+                const origSettings = { gpgPath: '/valid/path' };
+                mockStore.get = jest.fn().mockReturnValue(origSettings);
 
-                main.onSaveSettings(mockEvent, {
+                const response = main.onSaveSettings(mockEvent, {
                     gpgPath: '/invalid/path/to/file'
                 });
 
                 expect(mockStore.get).toHaveBeenCalledWith(StoreKeys.SETTINGS);
-                expect(mockEvent.reply).toHaveBeenCalledWith(
-                    Events.SAVE_SETTINGS_RESULT,
-                    {
-                        error: new Error(
-                            'Could not set executable path to /invalid/path/to/file'
-                        ),
-                        settings: { gpgPath: '/valid/path' }
-                    }
+
+                expect(response.settings).toEqual(origSettings);
+                expect(response.error).toEqual(
+                    new Error(
+                        'Could not set executable path to /invalid/path/to/file'
+                    )
                 );
             });
 
@@ -149,12 +143,9 @@ describe('Main', () => {
                     }
                 );
 
-                await main.onRequestPubKeys(mockEvent);
+                const response = await main.onRequestPubKeys(mockEvent);
 
-                expect(mockReply).toHaveBeenCalledTimes(1);
-                expect(mockReply).toHaveBeenCalledWith(Events.KEYS_RESULT, {
-                    pubKeys: ['alpha', 'beta']
-                });
+                expect(response).toEqual({ pubKeys: ['alpha', 'beta'] });
             });
 
             it('handles request for public keys when gpg errors', async () => {
@@ -163,10 +154,9 @@ describe('Main', () => {
                     throw expectedError;
                 });
 
-                await main.onRequestPubKeys(mockEvent);
+                const response = await main.onRequestPubKeys(mockEvent);
 
-                expect(mockReply).toHaveBeenCalledTimes(1);
-                expect(mockReply).toHaveBeenCalledWith(Events.KEYS_RESULT, {
+                expect(response).toEqual({
                     pubKeys: [],
                     error: expectedError
                 });
@@ -175,18 +165,15 @@ describe('Main', () => {
 
         describe('onDeletePubKey', () => {
             it('replies on successfully deleting a key', async () => {
-                (mockGpg.deleteKey as jest.Mock).mockImplementation(() =>
+                (mockGpg.deleteKey as jest.Mock).mockReturnValue(
                     Promise.resolve()
                 );
 
-                await main.onDeletePubKey(mockEvent, 'key-id');
+                const response = await main.onDeleteKey(mockEvent, 'key-id');
 
-                expect(mockEvent.reply).toHaveBeenCalledWith(
-                    Events.KEY_DELETE,
-                    {
-                        keyId: 'key-id'
-                    }
-                );
+                expect(response).toEqual({
+                    keyId: 'key-id'
+                });
             });
 
             it('replies with error when deleting fails', async () => {
@@ -195,15 +182,12 @@ describe('Main', () => {
                     Promise.reject(error)
                 );
 
-                await main.onDeletePubKey(mockEvent, 'key-id');
+                const response = await main.onDeleteKey(mockEvent, 'key-id');
 
-                expect(mockEvent.reply).toHaveBeenCalledWith(
-                    Events.KEY_DELETE,
-                    {
-                        keyId: 'key-id',
-                        error
-                    }
-                );
+                expect(response).toEqual({
+                    keyId: 'key-id',
+                    error
+                });
             });
         });
 
@@ -213,13 +197,12 @@ describe('Main', () => {
                     return Promise.resolve('ENCRYPTED');
                 });
 
-                await main.onRequestCrypt(mockEvent, {
+                const response = await main.onRequestCrypt(mockEvent, {
                     recipients: ['alpha'],
                     text: 'foobar'
                 });
 
-                expect(mockReply).toHaveBeenCalledTimes(1);
-                expect(mockReply).toHaveBeenCalledWith(Events.CRYPT_RESULT, {
+                expect(response).toEqual({
                     encrypted: true,
                     text: 'ENCRYPTED'
                 });
@@ -232,39 +215,36 @@ describe('Main', () => {
                     return Promise.resolve('DECRYPTED');
                 });
 
-                await main.onRequestCrypt(mockEvent, {
+                const response = await main.onRequestCrypt(mockEvent, {
                     recipients: [],
                     text: 'foobar'
                 });
 
-                expect(mockReply).toHaveBeenCalledTimes(1);
-                expect(mockReply).toHaveBeenCalledWith(Events.CRYPT_RESULT, {
+                expect(response).toEqual({
                     encrypted: false,
                     text: 'DECRYPTED'
                 });
             });
 
             it('handles empty text', async () => {
-                await main.onRequestCrypt(mockEvent, {
+                const response = await main.onRequestCrypt(mockEvent, {
                     recipients: ['alpha'],
                     text: ''
                 });
 
-                expect(mockReply).toHaveBeenCalledTimes(1);
-                expect(mockReply).toHaveBeenCalledWith(Events.CRYPT_RESULT, {
+                expect(response).toEqual({
                     encrypted: false,
                     text: ''
                 });
             });
 
             it('handles empty recipient list', async () => {
-                await main.onRequestCrypt(mockEvent, {
+                const response = await main.onRequestCrypt(mockEvent, {
                     recipients: [],
                     text: 'encrypt me plz!'
                 });
 
-                expect(mockReply).toHaveBeenCalledTimes(1);
-                expect(mockReply).toHaveBeenCalledWith(Events.CRYPT_RESULT, {
+                expect(response).toEqual({
                     encrypted: false,
                     text: ''
                 });
@@ -275,15 +255,12 @@ describe('Main', () => {
             it('loads from store', () => {
                 (mockStore.get as jest.Mock).mockReturnValue('settings');
 
-                main.onLoadSettings(mockEvent);
+                const response = main.onLoadSettings(mockEvent);
 
                 expect(mockStore.get as jest.Mock).toHaveBeenCalledWith(
                     StoreKeys.SETTINGS
                 );
-                expect(mockEvent.reply as jest.Mock).toHaveBeenCalledWith(
-                    Events.LOAD_SETTINGS_RESULT,
-                    'settings'
-                );
+                expect(response).toEqual('settings');
             });
 
             it('saves to store and applies settings', () => {

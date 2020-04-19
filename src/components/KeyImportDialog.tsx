@@ -19,6 +19,10 @@ const KeyImportDialog: React.FC<KeyImportDialogProps> = observer(
             onClose();
         };
 
+        const onTextChange = (event: FormEvent<HTMLTextAreaElement>) => {
+            setCurText(event.currentTarget.value);
+        };
+
         return (
             <Modal open={open} closeIcon={true} onClose={() => onClose()}>
                 <Modal.Header>Import Key</Modal.Header>
@@ -29,11 +33,7 @@ const KeyImportDialog: React.FC<KeyImportDialogProps> = observer(
                             <TextArea
                                 placeholder='Paste key here'
                                 rows={20}
-                                onChange={(
-                                    event: FormEvent<HTMLTextAreaElement>
-                                ) => {
-                                    setCurText(event.currentTarget.value);
-                                }}
+                                onChange={onTextChange}
                                 value={curText}
                             />
                         </Form.Field>

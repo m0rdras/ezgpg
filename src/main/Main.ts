@@ -1,17 +1,19 @@
 import debug from 'debug';
-import { ipcMain, IpcMainEvent } from 'electron';
+import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import ElectronStore from 'electron-store';
 
-import { Events, StoreKeys } from '../Constants';
+import {
+    CryptRequest,
+    CryptResponse,
+    DeleteKeyResponse,
+    Events,
+    KeysResponse,
+    StoreKeys
+} from '../Constants';
 import { Settings } from '../stores/SettingsStore';
 import Gpg from './Gpg';
 
 const log = debug('ezgpg:main');
-
-export interface RequestCryptData {
-    text: string;
-    recipients: readonly string[];
-}
 
 export default class Main {
     static initGpgPath = (gpg: Gpg, store: ElectronStore) => {
@@ -34,12 +36,12 @@ export default class Main {
 
         const main = new Main(gpg, store);
 
-        ipcMain.on(Events.KEYS, main.onRequestPubKeys.bind(main));
-        ipcMain.on(Events.KEY_DELETE, main.onDeletePubKey.bind(main));
-        ipcMain.on(Events.KEY_IMPORT, main.onImportKey.bind(main));
-        ipcMain.on(Events.CRYPT, main.onRequestCrypt.bind(main));
-        ipcMain.on(Events.LOAD_SETTINGS, main.onLoadSettings.bind(main));
-        ipcMain.on(Events.SAVE_SETTINGS, main.onSaveSettings.bind(main));
+        ipcMain.handle(Events.KEYS, main.onRequestPubKeys.bind(main));
+        ipcMain.handle(Events.KEY_DELETE, main.onDeleteKey.bind(main));
+        ipcMain.handle(Events.KEY_IMPORT, main.onImportKey.bind(main));
+        ipcMain.handle(Events.CRYPT, main.onRequestCrypt.bind(main));
+        ipcMain.handle(Events.LOAD_SETTINGS, main.onLoadSettings.bind(main));
+        ipcMain.handle(Events.SAVE_SETTINGS, main.onSaveSettings.bind(main));
 
         return main;
     }
@@ -49,73 +51,78 @@ export default class Main {
         private readonly store: ElectronStore = new ElectronStore()
     ) {}
 
-    async onRequestPubKeys(event: Electron.IpcMainEvent) {
+    async onRequestPubKeys(): Promise<KeysResponse> {
         try {
             const pubKeys = await this.gpg.getPublicKeys();
             log('Found %d keys', pubKeys.length);
-            event.reply(Events.KEYS_RESULT, { pubKeys });
+            return { pubKeys };
         } catch (error) {
             log('Error while getting public keys: %O', error);
-            event.reply(Events.KEYS_RESULT, { pubKeys: [], error });
+            return { pubKeys: [], error };
         }
     }
 
-    async onDeletePubKey(event: Electron.IpcMainEvent, keyId: string) {
+    async onDeleteKey(
+        event: IpcMainInvokeEvent,
+        keyId: string
+    ): Promise<DeleteKeyResponse> {
         try {
             await this.gpg.deleteKey(keyId);
-            event.reply(Events.KEY_DELETE, { keyId });
         } catch (error) {
-            event.reply(Events.KEY_DELETE, { keyId, error });
+            return { keyId, error };
         }
+        return { keyId };
     }
 
-    async onImportKey(event: Electron.IpcMainEvent, key: string) {
+    async onImportKey(event: IpcMainInvokeEvent, key: string) {
         try {
             log('importing...');
             const result = await this.gpg.importKey(key);
             log(result);
-            event.reply(Events.KEY_IMPORT, {});
+            return {};
         } catch (error) {
-            event.reply(Events.KEY_IMPORT, { error });
+            return { error };
         }
     }
 
-    async onRequestCrypt(event: Electron.IpcMainEvent, data: RequestCryptData) {
-        const { text, recipients } = data;
+    async onRequestCrypt(
+        event: IpcMainInvokeEvent,
+        { text, recipients }: CryptRequest
+    ): Promise<CryptResponse> {
         if (Gpg.isEncrypted(text)) {
-            event.reply(Events.CRYPT_RESULT, {
+            return {
                 encrypted: false,
                 text: await this.gpg.decrypt(text)
-            });
+            };
         } else if (text.length > 0 && recipients.length > 0) {
-            event.reply(Events.CRYPT_RESULT, {
+            return {
                 encrypted: true,
                 text: await this.gpg.encrypt(text, recipients)
-            });
+            };
         } else {
-            event.reply(Events.CRYPT_RESULT, { text: '', encrypted: false });
+            return { text: '', encrypted: false };
         }
     }
 
-    onLoadSettings(event: IpcMainEvent) {
+    onLoadSettings() {
         const settings = this.store.get(StoreKeys.SETTINGS);
         log('Loaded settings: %O', settings);
-        event.reply(Events.LOAD_SETTINGS_RESULT, settings);
+        return settings;
     }
 
-    onSaveSettings(event: IpcMainEvent, settings: Settings) {
+    onSaveSettings(event: IpcMainInvokeEvent, settings: Settings) {
         try {
             this.applySettings(settings);
             log('saving', settings);
             this.store.set(StoreKeys.SETTINGS, settings);
             log('Successfully saved setings: %O', settings);
-            event.reply(Events.SAVE_SETTINGS_RESULT, { settings });
+            return { settings };
         } catch (error) {
             const curSettings = this.store.get(StoreKeys.SETTINGS);
-            event.reply(Events.SAVE_SETTINGS_RESULT, {
+            return {
                 error,
                 settings: curSettings
-            });
+            };
         }
     }
 

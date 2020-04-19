@@ -28,7 +28,10 @@ const Root: React.FC<RootProps> = observer(({ store }) => {
                             <SettingsPage settingsStore={store.settingsStore} />
                         </Route>
                         <Route exact path='/'>
-                            <CryptPage cryptStore={store} />
+                            <CryptPage
+                                cryptStore={store.cryptStore}
+                                gpgKeyStore={store.gpgKeyStore}
+                            />
                         </Route>
                     </Switch>
                 </Container>

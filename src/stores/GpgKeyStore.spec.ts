@@ -1,11 +1,9 @@
-import { destroy } from 'mobx-state-tree';
-
 import { Events } from '../Constants';
 import { GpgKeyStore, IGpgKeyStore } from './GpgKeyStore';
 
 describe('GpgKeyStore', () => {
     let deps: {
-        ipcRenderer: { on: jest.Mock; off: jest.Mock; send: jest.Mock };
+        ipcRenderer: { invoke: jest.Mock };
     };
     let store: IGpgKeyStore;
 
@@ -15,65 +13,33 @@ describe('GpgKeyStore', () => {
     beforeEach(() => {
         deps = {
             ipcRenderer: {
-                off: jest.fn(),
-                on: jest.fn(),
-                send: jest.fn()
+                invoke: jest.fn()
             }
         };
     });
 
-    it('knows about all handlers', () => {
+    it('sends IPC message to load data', async () => {
+        deps.ipcRenderer.invoke.mockReturnValue(
+            Promise.resolve({ pubKeys: [] })
+        );
         store = createStore();
-        expect(store.getHandlers()).toEqual([
-            [Events.KEYS_RESULT, store.onGpgKeyResponse],
-            [Events.KEY_DELETE, store.onDeleteKeyResponse]
-        ]);
+        await store.load();
+
+        expect(deps.ipcRenderer.invoke).toHaveBeenCalledWith(Events.KEYS);
     });
 
-    it('initializes and registers handler', () => {
+    it('handles pubkey response correctly', async () => {
+        deps.ipcRenderer.invoke.mockReturnValue(
+            Promise.resolve({
+                pubKeys: [
+                    { id: '1', name: 'one', email: 'one@dev.local' },
+                    { id: '2', name: 'two', email: 'two@dev.local' }
+                ]
+            })
+        );
         store = createStore();
 
-        expect(deps.ipcRenderer.on).toHaveBeenCalledTimes(2);
-        expect(deps.ipcRenderer.on).toHaveBeenCalledWith(
-            Events.KEYS_RESULT,
-            store.onGpgKeyResponse
-        );
-        expect(deps.ipcRenderer.on).toHaveBeenCalledWith(
-            Events.KEY_DELETE,
-            store.onDeleteKeyResponse
-        );
-    });
-
-    it('destroys and unregisters handler', () => {
-        store = createStore();
-        destroy(store);
-
-        expect(deps.ipcRenderer.off).toHaveBeenCalledTimes(2);
-        expect(deps.ipcRenderer.off).toHaveBeenCalledWith(
-            Events.KEYS_RESULT,
-            store.onGpgKeyResponse
-        );
-        expect(deps.ipcRenderer.off).toHaveBeenCalledWith(
-            Events.KEY_DELETE,
-            store.onDeleteKeyResponse
-        );
-    });
-
-    it('sends IPC message to load data', () => {
-        store = createStore();
-        store.load();
-
-        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.KEYS);
-    });
-
-    it('handles pubkey response correctly', () => {
-        store = createStore();
-        store.onGpgKeyResponse({} as Electron.IpcRendererEvent, {
-            pubKeys: [
-                { id: '1', name: 'one', email: 'one@dev.local' },
-                { id: '2', name: 'two', email: 'two@dev.local' }
-            ]
-        });
+        await store.load();
 
         expect(store.gpgKeys.get('1')).toEqual({
             email: 'one@dev.local',
@@ -88,14 +54,18 @@ describe('GpgKeyStore', () => {
         expect(store.gpgKeys.size).toBe(2);
     });
 
-    it('handles error in pubkey response correctly', () => {
+    it('handles error in pubkey response correctly', async () => {
+        deps.ipcRenderer.invoke.mockReturnValue(
+            Promise.resolve({
+                pubKeys: [],
+                error: new Error('😱')
+            })
+        );
         store = createStore({
             1: { id: '1', name: 'beta', email: 'beta@dev.local' }
         });
-        store.onGpgKeyResponse({} as Electron.IpcRendererEvent, {
-            pubKeys: [],
-            error: new Error('😱')
-        });
+
+        await store.load();
 
         expect(store.gpgKeys.size).toBe(0);
     });
@@ -136,34 +106,55 @@ describe('GpgKeyStore', () => {
         ]);
     });
 
-    it('sends IPC message to delete key', () => {
+    it('sends IPC message to delete key', async () => {
+        deps.ipcRenderer.invoke.mockReturnValue(
+            Promise.resolve({
+                keyId: 'foo'
+            })
+        );
         store = createStore();
-        store.deleteKey('foo');
+        await store.deleteKey('foo');
 
-        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(
+        expect(deps.ipcRenderer.invoke).toHaveBeenCalledWith(
             Events.KEY_DELETE,
             'foo'
         );
     });
 
-    it('handles successful delete key response', () => {
-        store = createStore();
-
-        store.onDeleteKeyResponse({} as Electron.IpcRendererEvent, {
-            keyId: 'foo'
+    it('handles successful delete key response', async () => {
+        deps.ipcRenderer.invoke.mockReturnValue(
+            Promise.resolve({
+                keyId: '1'
+            })
+        );
+        store = createStore({
+            1: { id: '1', name: 'beta', email: 'beta@dev.local' },
+            2: { id: '2', name: 'alpha', email: 'alpha@dev.local' }
         });
 
-        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.KEYS);
+        await store.deleteKey('1');
+
+        expect(store.gpgKeys.get('1')).toBeUndefined();
     });
 
-    it('handles unsuccessful delete key response', () => {
-        store = createStore();
-
-        store.onDeleteKeyResponse({} as Electron.IpcRendererEvent, {
-            keyId: 'foo',
-            error: new Error('fail')
+    it('handles unsuccessful delete key response', async () => {
+        deps.ipcRenderer.invoke.mockReturnValue(
+            Promise.resolve({
+                keyId: 'foo',
+                error: new Error('fail')
+            })
+        );
+        store = createStore({
+            1: { id: '1', name: 'beta', email: 'beta@dev.local' },
+            2: { id: '2', name: 'alpha', email: 'alpha@dev.local' }
         });
 
-        expect(deps.ipcRenderer.send).toHaveBeenCalledWith(Events.KEYS);
+        await store.deleteKey('1');
+
+        expect(store.gpgKeys.get('1')).toEqual({
+            id: '1',
+            name: 'beta',
+            email: 'beta@dev.local'
+        });
     });
 });

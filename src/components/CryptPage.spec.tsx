@@ -1,38 +1,31 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { RootStore } from '../stores/RootStore';
 import CryptPage from './CryptPage';
 import CryptTextArea from './CryptTextArea';
 import RecipientDropdown from './RecipientDropdown';
+import { GpgKeyStore } from '../stores/GpgKeyStore';
+import { CryptStore } from '../stores/CryptStore';
 
 describe('CryptPage', () => {
-    const ipcRendererMock = { on: jest.fn(), send: jest.fn() };
-    const store = RootStore.create(
-        {
-            cryptStore: {
-                input: {
-                    val: ''
-                },
-                output: {
-                    val: ''
-                },
-                pending: false
-            },
-            gpgKeyStore: {
-                gpgKeys: {},
-                selectedKeys: []
-            },
-            settingsStore: {
-                gpgPath: '/foo/bar/gpg'
-            }
+    const cryptStore = CryptStore.create({
+        input: {
+            val: ''
         },
-        {
-            ipcRenderer: ipcRendererMock
-        }
-    );
+        output: {
+            val: ''
+        },
+        pending: false
+    });
+    const gpgKeyStore = GpgKeyStore.create({
+        gpgKeys: {},
+        selectedKeys: []
+    });
+
     it('should render', () => {
-        const wrapper = shallow(<CryptPage cryptStore={store} />);
+        const wrapper = shallow(
+            <CryptPage cryptStore={cryptStore} gpgKeyStore={gpgKeyStore} />
+        );
         expect(wrapper.find(RecipientDropdown)).toHaveLength(1);
         expect(wrapper.find(CryptTextArea)).toHaveLength(2);
     });
