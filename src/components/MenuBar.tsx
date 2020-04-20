@@ -7,7 +7,7 @@ export const MenuNavLink: React.FC<NavLinkProps> = (props) => (
 );
 
 const MenuBar: React.FC = () => (
-    <Menu attached='top' pointing style={{ marginBottom: '2em' }}>
+    <Menu pointing fixed='top'>
         <Menu.Item>
             <Header>
                 <Icon name='key' /> ezgpg
