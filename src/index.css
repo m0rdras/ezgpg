@@ -50,10 +50,32 @@ body {
     text-align: right;
 }
 
-.crypttextarea.encrypted {
+.cryptpage-form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.cryptpage-form-field-container {
+    display: flex;
+    flex-grow: 1;
+}
+
+.cryptpage-form-field {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    margin: 1em !important;
+}
+
+.cryptpage-form-field-textarea {
+    flex-grow: 1;
+}
+
+.cryptpage-form-field-textarea.encrypted {
     color: DarkRed !important;
 }
 
-.crypttextarea.decrypted {
+.cryptpage-form-field-textarea.decrypted {
     color: ForestGreen !important;
 }

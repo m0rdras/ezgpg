@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { Form, Grid, GridRow } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
 
 import CryptTextArea from './CryptTextArea';
 import RecipientDropdown from './RecipientDropdown';
@@ -17,27 +17,13 @@ const CryptPage: React.FC<CryptPageProps> = observer(
         const { output, input } = cryptStore;
 
         return (
-            <div>
-                <Form>
-                    <Grid container>
-                        <GridRow>
-                            <Grid.Column width={16}>
-                                <RecipientDropdown keyStore={gpgKeyStore} />
-                            </Grid.Column>
-                        </GridRow>
-                        <GridRow>
-                            <Grid.Column width={8}>
-                                <CryptTextArea label='Input' text={input} />
-                            </Grid.Column>
-                            <Grid.Column width={8}>
-                                <CryptTextArea
-                                    label='Output'
-                                    text={output}
-                                    readOnly
-                                />
-                            </Grid.Column>
-                        </GridRow>
-                    </Grid>
+            <div style={{ height: '100%' }}>
+                <Form className='cryptpage-form'>
+                    <RecipientDropdown keyStore={gpgKeyStore} />
+                    <div className='cryptpage-form-field-container'>
+                        <CryptTextArea label='Input' text={input} />
+                        <CryptTextArea label='Output' text={output} readOnly />
+                    </div>
                 </Form>
             </div>
         );

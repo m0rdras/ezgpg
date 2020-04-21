@@ -9,7 +9,9 @@ describe('CryptTextArea', () => {
     it('should render with unencrypted text', () => {
         const ioText = IOText.create({ val: 'foo' });
         const wrapper = shallow(<CryptTextArea text={ioText} />);
-        expect(wrapper.find('.crypttextarea.decrypted')).toHaveLength(1);
+        expect(
+            wrapper.find('.cryptpage-form-field-textarea.decrypted')
+        ).toHaveLength(1);
         expect(wrapper.find(TextArea).prop('value')).toBe('foo');
     });
 
@@ -18,7 +20,9 @@ describe('CryptTextArea', () => {
             '-----BEGIN PGP MESSAGE-----\nabcdef\n-----END PGP MESSAGE-----\n';
         const ioText = IOText.create({ val });
         const wrapper = shallow(<CryptTextArea text={ioText} />);
-        expect(wrapper.find('.crypttextarea.encrypted')).toHaveLength(1);
+        expect(
+            wrapper.find('.cryptpage-form-field-textarea.encrypted')
+        ).toHaveLength(1);
         expect(wrapper.find(TextArea).prop('value')).toBe(val);
     });
 

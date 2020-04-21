@@ -14,17 +14,16 @@ interface CryptTextAreaProps {
 const CryptTextArea: React.FC<CryptTextAreaProps> = observer(
     ({ label, readOnly, text }) => {
         return (
-            <Form.Field>
+            <Form.Field className='cryptpage-form-field'>
                 {label && <label>{label}</label>}
                 <TextArea
-                    rows={20}
                     onChange={(event: FormEvent<HTMLTextAreaElement>) => {
                         text.setText(event.currentTarget.value);
                     }}
                     value={text.val}
                     readOnly={readOnly}
                     className={
-                        'crypttextarea ' +
+                        'cryptpage-form-field-textarea ' +
                         (Gpg.isEncrypted(text.val) ? 'encrypted' : 'decrypted')
                     }
                 />
