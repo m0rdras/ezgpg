@@ -5,6 +5,7 @@ import * as ReactDOM from 'react-dom';
 
 import Root from './components/Root';
 import createRootStore from './stores/RootStore';
+import { createGlobalStyle } from 'styled-components';
 
 const log = debug('ezgpg:main');
 
@@ -20,4 +21,33 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-ReactDOM.render(<Root store={rootStore} />, document.getElementById('root'));
+const GlobalStyle = createGlobalStyle`
+    html,
+    body {
+        height: 100%;
+    }
+    
+    html {
+        box-sizing: border-box;
+    }
+    
+    body {
+        font: caption;
+        margin: 0;
+    }
+    .app {
+        -webkit-user-select: none;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+`;
+
+const App = (
+    <>
+        <GlobalStyle />
+        <Root store={rootStore} />
+    </>
+);
+
+ReactDOM.render(App, document.getElementById('root'));

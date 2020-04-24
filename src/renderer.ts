@@ -29,4 +29,4 @@
 import 'mobx-react-lite/optimizeForReactDom';
 import './App';
 
-import './index.css';
+import 'semantic-ui-css/semantic.min.css';

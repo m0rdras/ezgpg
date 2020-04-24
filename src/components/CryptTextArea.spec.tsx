@@ -1,6 +1,5 @@
 import { shallow } from 'enzyme';
 import React from 'react';
-import { TextArea } from 'semantic-ui-react';
 
 import { IOText } from '../stores/CryptStore';
 import CryptTextArea from './CryptTextArea';
@@ -8,22 +7,25 @@ import CryptTextArea from './CryptTextArea';
 describe('CryptTextArea', () => {
     it('should render with unencrypted text', () => {
         const ioText = IOText.create({ val: 'foo' });
+
         const wrapper = shallow(<CryptTextArea text={ioText} />);
-        expect(
-            wrapper.find('.cryptpage-form-field-textarea.decrypted')
-        ).toHaveLength(1);
-        expect(wrapper.find(TextArea).prop('value')).toBe('foo');
+
+        const styledTextArea = wrapper.find('CryptTextArea__StyledTextArea');
+        expect(styledTextArea).toHaveLength(1);
+        expect(styledTextArea.prop('encrypted')).toBe(false);
+        expect(styledTextArea.prop('value')).toBe('foo');
     });
 
     it('should render with encrypted text', () => {
         const val =
             '-----BEGIN PGP MESSAGE-----\nabcdef\n-----END PGP MESSAGE-----\n';
         const ioText = IOText.create({ val });
+
         const wrapper = shallow(<CryptTextArea text={ioText} />);
-        expect(
-            wrapper.find('.cryptpage-form-field-textarea.encrypted')
-        ).toHaveLength(1);
-        expect(wrapper.find(TextArea).prop('value')).toBe(val);
+
+        const styledTextArea = wrapper.find('CryptTextArea__StyledTextArea');
+        expect(styledTextArea).toHaveLength(1);
+        expect(styledTextArea.prop('value')).toBe(val);
     });
 
     it('should render a label', () => {
@@ -38,10 +40,12 @@ describe('CryptTextArea', () => {
 
     it('should react to change events', () => {
         const ioText = IOText.create({ val: 'foo' });
+
         const wrapper = shallow(<CryptTextArea text={ioText} />);
-        wrapper
-            .find(TextArea)
-            .simulate('change', { currentTarget: { value: 'bar' } });
+
+        const styledTextArea = wrapper.find('CryptTextArea__StyledTextArea');
+        styledTextArea.simulate('change', { currentTarget: { value: 'bar' } });
+
         expect(ioText.val).toEqual('bar');
     });
 });

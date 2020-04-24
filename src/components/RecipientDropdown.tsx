@@ -3,6 +3,13 @@ import React from 'react';
 import { Dropdown, Form } from 'semantic-ui-react';
 
 import { IGpgKeyStore } from '../stores/GpgKeyStore';
+import styled from 'styled-components';
+
+const StyledFormField = styled(Form.Field)`
+    &&& {
+        margin: 0 1em !important;
+    }
+`;
 
 interface RecipientDropdownProps {
     keyStore: IGpgKeyStore;
@@ -16,7 +23,7 @@ const RecipientDropdown: React.FC<RecipientDropdownProps> = observer(
             value: el.id
         }));
         return (
-            <Form.Field>
+            <StyledFormField>
                 <label>Recipient(s)</label>
                 <Dropdown
                     placeholder='Add recipient(s)'
@@ -30,7 +37,7 @@ const RecipientDropdown: React.FC<RecipientDropdownProps> = observer(
                         keyStore.setSelectedKeys(val);
                     }}
                 />
-            </Form.Field>
+            </StyledFormField>
         );
     }
 );

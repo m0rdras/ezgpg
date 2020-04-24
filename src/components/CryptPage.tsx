@@ -6,6 +6,20 @@ import CryptTextArea from './CryptTextArea';
 import RecipientDropdown from './RecipientDropdown';
 import { ICryptStore } from '../stores/CryptStore';
 import { IGpgKeyStore } from '../stores/GpgKeyStore';
+import styled from 'styled-components';
+
+const StyledForm = styled(Form)`
+    &&& {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+`;
+
+const TextAreaContainer = styled.div`
+    display: flex;
+    flex-grow: 1;
+`;
 
 interface CryptPageProps {
     cryptStore: ICryptStore;
@@ -17,15 +31,13 @@ const CryptPage: React.FC<CryptPageProps> = observer(
         const { output, input } = cryptStore;
 
         return (
-            <div style={{ height: '100%' }}>
-                <Form className='cryptpage-form'>
-                    <RecipientDropdown keyStore={gpgKeyStore} />
-                    <div className='cryptpage-form-field-container'>
-                        <CryptTextArea label='Input' text={input} />
-                        <CryptTextArea label='Output' text={output} readOnly />
-                    </div>
-                </Form>
-            </div>
+            <StyledForm>
+                <RecipientDropdown keyStore={gpgKeyStore} />
+                <TextAreaContainer>
+                    <CryptTextArea label='Input' text={input} />
+                    <CryptTextArea label='Output' text={output} readOnly />
+                </TextAreaContainer>
+            </StyledForm>
         );
     }
 );
