@@ -29,7 +29,9 @@
     ],
     "config": {
         "forge": {
-            "packagerConfig": {},
+            "packagerConfig": {
+                "icon": "./src/ezgpg-logo"
+            },
             "makers": [
                 {
                     "name": "@electron-forge/maker-squirrel",
