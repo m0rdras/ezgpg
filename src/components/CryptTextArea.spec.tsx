@@ -12,7 +12,7 @@ describe('CryptTextArea', () => {
 
         const styledTextArea = wrapper.find('CryptTextArea__StyledTextArea');
         expect(styledTextArea).toHaveLength(1);
-        expect(styledTextArea.prop('encrypted')).toBe(false);
+        expect(styledTextArea.prop('encrypted')).toBeUndefined();
         expect(styledTextArea.prop('value')).toBe('foo');
     });
 
@@ -25,6 +25,7 @@ describe('CryptTextArea', () => {
 
         const styledTextArea = wrapper.find('CryptTextArea__StyledTextArea');
         expect(styledTextArea).toHaveLength(1);
+        expect(styledTextArea.prop('encrypted')).toBe(1);
         expect(styledTextArea.prop('value')).toBe(val);
     });
 
