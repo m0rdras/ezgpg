@@ -40,7 +40,7 @@ const CryptTextArea: React.FC<CryptTextAreaProps> = observer(
                     }}
                     value={text.val}
                     readOnly={readOnly}
-                    encrypted={Gpg.isEncrypted(text.val)}
+                    encrypted={Gpg.isEncrypted(text.val) ? 1 : undefined}
                 />
             </StyledFormField>
         );
