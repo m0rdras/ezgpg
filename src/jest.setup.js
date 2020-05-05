@@ -2,7 +2,7 @@ import Enzyme from 'enzyme';
 import EnzymeAdapter from 'enzyme-adapter-react-16';
 import { JSDOM } from 'jsdom';
 
-const jsdom = new JSDOM('<!doctype html><html lang="en"><body></body></html>');
+const jsdom = new JSDOM('<!doctype html><html lang="en"><body></body></html>', { url: 'https://localhost' });
 const { window } = jsdom;
 
 function copyProps(src, target) {
