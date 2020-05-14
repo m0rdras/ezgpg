@@ -14,7 +14,7 @@ export enum StoreKeys {
     SETTINGS = 'settings'
 }
 
-export interface KeysResponse {
+export interface GetKeysResponse {
     pubKeys: IGpgKey[];
     error?: Error;
 }
@@ -28,6 +28,8 @@ export interface SaveSettingsResponse {
     settings: Settings;
     error?: Error;
 }
+
+export type ImportKeyResponse = GetKeysResponse;
 
 export interface CryptRequest {
     text: string;

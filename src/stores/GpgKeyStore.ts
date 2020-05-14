@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { flow, getEnv, Instance, types } from 'mobx-state-tree';
 
-import { DeleteKeyResponse, Events, KeysResponse } from '../Constants';
+import { DeleteKeyResponse, Events } from '../Constants';
 
 const log = debug('ezgpg:gpgKeyStore');
 
@@ -32,49 +32,62 @@ export const GpgKeyStore = types
             );
         }
     }))
-    .actions((self) => ({
-        load: flow(function* load() {
-            log('requesting pub keys');
-            const renderer = getEnv(self).ipcRenderer;
-            const { pubKeys, error }: KeysResponse = yield renderer.invoke(
-                Events.KEYS
-            );
+    .actions((self) => {
+        const updateKeys = (pubKeys: readonly IGpgKey[]) => {
             self.selectedKeys.clear();
             self.gpgKeys.clear();
-            if (error) {
-                log('Error while getting pub keys: %O', error);
-            }
             pubKeys.forEach((key) => self.gpgKeys.put(key));
-        }),
+        };
 
-        deleteKey: flow(function* deleteKey(id: string) {
-            const renderer = getEnv(self).ipcRenderer;
-            const { keyId, error }: DeleteKeyResponse = yield renderer.invoke(
-                Events.KEY_DELETE,
-                id
-            );
-            if (error) {
-                log('Error while deleting key %s: %O', keyId, error);
-            } else {
+        return {
+            load: flow(function* load() {
+                log('requesting pub keys');
+                const renderer = getEnv(self).ipcRenderer;
+                const { pubKeys, error } = yield renderer.invoke(Events.KEYS);
+                if (error) {
+                    log('Error while getting pub keys: %O', error);
+                }
+                updateKeys(pubKeys);
+            }),
+
+            deleteKey: flow(function* deleteKey(id: string) {
+                const renderer = getEnv(self).ipcRenderer;
+                const {
+                    keyId,
+                    error
+                }: DeleteKeyResponse = yield renderer.invoke(
+                    Events.KEY_DELETE,
+                    id
+                );
+                if (error) {
+                    log('Error while deleting key %s: %O', keyId, error);
+                } else {
+                    self.selectedKeys.clear();
+                    self.gpgKeys.delete(keyId);
+                    log('Deleted key %s', keyId);
+                }
+            }),
+
+            importKey: flow(function* importKey(key: string) {
+                const { pubKeys, error } = yield getEnv(
+                    self
+                ).ipcRenderer.invoke(Events.KEY_IMPORT, key);
+                if (error) {
+                    log('Error while importing key: %O', error);
+                } else {
+                    updateKeys(pubKeys);
+                }
+            }),
+
+            setSelectedKeys(names: string[]) {
                 self.selectedKeys.clear();
-                self.gpgKeys.delete(keyId);
-                log('Deleted key %s', keyId);
+                self.selectedKeys.push(
+                    ...(names
+                        .map((name) => self.gpgKeys.get(name))
+                        .filter((gpgKey) => gpgKey !== undefined) as IGpgKey[])
+                );
             }
-        }),
-
-        importKey: flow(function* importKey(key: string) {
-            log('trying to import key: %s', key);
-            yield getEnv(self).ipcRenderer.invoke(Events.KEY_IMPORT, key);
-        }),
-
-        setSelectedKeys(names: string[]) {
-            self.selectedKeys.clear();
-            self.selectedKeys.push(
-                ...(names
-                    .map((name) => self.gpgKeys.get(name))
-                    .filter((gpgKey) => gpgKey !== undefined) as IGpgKey[])
-            );
-        }
-    }));
+        };
+    });
 
 export type IGpgKeyStore = Instance<typeof GpgKeyStore>;

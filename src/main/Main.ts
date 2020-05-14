@@ -7,7 +7,8 @@ import {
     CryptResponse,
     DeleteKeyResponse,
     Events,
-    KeysResponse,
+    GetKeysResponse,
+    ImportKeyResponse,
     StoreKeys
 } from '../Constants';
 import { Settings } from '../stores/SettingsStore';
@@ -51,7 +52,7 @@ export default class Main {
         private readonly store: ElectronStore = new ElectronStore()
     ) {}
 
-    async onRequestPubKeys(): Promise<KeysResponse> {
+    async onRequestPubKeys(): Promise<GetKeysResponse> {
         try {
             const pubKeys = await this.gpg.getPublicKeys();
             log('Found %d keys', pubKeys.length);
@@ -74,14 +75,15 @@ export default class Main {
         return { keyId };
     }
 
-    async onImportKey(event: IpcMainInvokeEvent, key: string) {
+    async onImportKey(
+        event: IpcMainInvokeEvent,
+        key: string
+    ): Promise<ImportKeyResponse> {
         try {
-            log('importing...');
-            const result = await this.gpg.importKey(key);
-            log(result);
-            return {};
+            await this.gpg.importKey(key);
+            return { pubKeys: await this.gpg.getPublicKeys() };
         } catch (error) {
-            return { error };
+            return { pubKeys: await this.gpg.getPublicKeys(), error };
         }
     }
 
