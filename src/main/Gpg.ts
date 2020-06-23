@@ -134,7 +134,6 @@ export default class Gpg {
 
     private static parseGpgPubKeyOutput = (str: string) => {
         const lines = str.split('\n');
-        assert(lines.length >= 4);
 
         const id = lines[1].trim();
         const matches = lines[2].match(/^uid\s+\[.*] (.*?)( <(.*)>)?$/);
