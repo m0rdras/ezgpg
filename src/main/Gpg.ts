@@ -1,4 +1,3 @@
-import assert from 'assert';
 import { ChildProcess, SpawnOptions } from 'child_process';
 import spawn from 'cross-spawn';
 import debug from 'debug';
