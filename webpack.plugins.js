@@ -3,7 +3,9 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const forkTsCheckerOptions = {
     async: false,
-    eslint: true
+    eslint: {
+        files: './src/**/*.{ts,tsx,js,jsx}'
+    }
 };
 
 module.exports = [new ForkTsCheckerWebpackPlugin(forkTsCheckerOptions)];
