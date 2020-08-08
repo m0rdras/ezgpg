@@ -2,6 +2,7 @@ import { ChildProcess, SpawnOptions } from 'child_process';
 import spawn from 'cross-spawn';
 import debug from 'debug';
 import fs from 'fs';
+import { IGpgKey } from '../stores/GpgKeyStore';
 
 const log = debug('ezgpg:gpg');
 
@@ -10,7 +11,7 @@ export class GpgError extends Error {
         super(message);
     }
 
-    public toString() {
+    public toString(): string {
         return `${super.toString()} [Code: ${this.code}]`;
     }
 }
@@ -23,7 +24,7 @@ type SpawnFunction = (
 const defaultSpawnFn: SpawnFunction = spawn;
 
 export default class Gpg {
-    public static isEncrypted = (text: string) => {
+    public static isEncrypted = (text: string): boolean => {
         return (
             text.search('-----BEGIN PGP MESSAGE-----') > -1 &&
             text.search('-----END PGP MESSAGE-----\n') > -1
@@ -99,7 +100,7 @@ export default class Gpg {
         });
     }
 
-    public async getPublicKeys() {
+    public async getPublicKeys(): Promise<IGpgKey[]> {
         log('Getting pub keys');
         return (await this.spawn(['-k']))
             .trim()
@@ -110,7 +111,10 @@ export default class Gpg {
             .map(Gpg.parseGpgPubKeyOutput);
     }
 
-    public async encrypt(input: string, recipients: readonly string[]) {
+    public async encrypt(
+        input: string,
+        recipients: readonly string[]
+    ): Promise<string> {
         const recipientArgs = recipients.map((id) => ['-r', id]).flat();
 
         return this.spawn(
@@ -119,19 +123,19 @@ export default class Gpg {
         );
     }
 
-    public async decrypt(input: string) {
+    public async decrypt(input: string): Promise<string> {
         return this.spawn(['-d', '-a', '--trust-model', 'always'], input);
     }
 
-    public async deleteKey(keyId: string) {
+    public async deleteKey(keyId: string): Promise<string> {
         return this.spawn(['--delete-keys', keyId]);
     }
 
-    public async importKey(key: string) {
+    public async importKey(key: string): Promise<string> {
         return this.spawn(['--import'], key);
     }
 
-    private static parseGpgPubKeyOutput = (str: string) => {
+    private static parseGpgPubKeyOutput = (str: string): IGpgKey => {
         const lines = str.split('\n');
 
         const id = lines[1].trim();

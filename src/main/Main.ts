@@ -9,29 +9,37 @@ import {
     Events,
     GetKeysResponse,
     ImportKeyResponse,
-    StoreKeys
+    SaveSettingsResponse
 } from '../Constants';
 import { Settings } from '../stores/SettingsStore';
 import Gpg from './Gpg';
+import { Migrations } from 'conf/dist/source/types';
 
 const log = debug('ezgpg:main');
 
+const MIGRATIONS: Migrations<Settings> = {
+    '1.1.2': (store) => {
+        store.set('gpgPath', '');
+    }
+};
+
 export default class Main {
-    static initGpgPath = (gpg: Gpg, store: ElectronStore) => {
-        const settings = store.get(StoreKeys.SETTINGS, {});
-        if (settings?.gpgPath) {
-            if (!gpg.setExecutablePath(settings.gpgPath)) {
-                settings.gpgPath = gpg.detectExecutablePath();
-            }
-        } else {
-            settings.gpgPath = gpg.detectExecutablePath();
+    static initGpgPath = (gpg: Gpg, store: ElectronStore<Settings>): void => {
+        const gpgPath = store.get('gpgPath');
+        if (!gpgPath || gpgPath === '' || !gpg.setExecutablePath(gpgPath)) {
+            const detectedPath = gpg.detectExecutablePath();
+            store.set('gpgPath', detectedPath);
         }
-        store.set(StoreKeys.SETTINGS, settings);
-        return settings;
     };
 
-    static setup(gpg = new Gpg(), store = new ElectronStore()): Main {
+    static setup(gpg = new Gpg(), store?: ElectronStore<Settings>): Main {
         log('Starting up main process');
+
+        if (!store) {
+            store = new ElectronStore<Settings>({
+                migrations: MIGRATIONS
+            });
+        }
 
         this.initGpgPath(gpg, store);
 
@@ -49,7 +57,7 @@ export default class Main {
 
     constructor(
         private readonly gpg = new Gpg(),
-        private readonly store: ElectronStore = new ElectronStore()
+        private readonly store = new ElectronStore<Settings>()
     ) {}
 
     async onRequestPubKeys(): Promise<GetKeysResponse> {
@@ -106,29 +114,29 @@ export default class Main {
         }
     }
 
-    onLoadSettings() {
-        const settings = this.store.get(StoreKeys.SETTINGS);
-        log('Loaded settings: %O', settings);
-        return settings;
+    onLoadSettings(): Settings {
+        return this.store.store;
     }
 
-    onSaveSettings(event: IpcMainInvokeEvent, settings: Settings) {
+    onSaveSettings(
+        event: IpcMainInvokeEvent,
+        settings: Settings
+    ): SaveSettingsResponse {
         try {
             this.applySettings(settings);
             log('saving', settings);
-            this.store.set(StoreKeys.SETTINGS, settings);
+            this.store.set(settings);
             log('Successfully saved setings: %O', settings);
             return { settings };
         } catch (error) {
-            const curSettings = this.store.get(StoreKeys.SETTINGS);
             return {
                 error,
-                settings: curSettings
+                settings: this.store.store
             };
         }
     }
 
-    applySettings(settings: Settings) {
+    applySettings(settings: Settings): void {
         if (settings?.gpgPath) {
             log('Applying settings: %O', settings);
             if (!this.gpg.setExecutablePath(settings.gpgPath)) {

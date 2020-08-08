@@ -2,9 +2,9 @@ import { flow, getEnv, Instance, types } from 'mobx-state-tree';
 
 import { Events, SaveSettingsResponse } from '../Constants';
 
-export interface Settings {
+export type Settings = {
     gpgPath: string;
-}
+};
 
 export const SettingsStore = types
     .model('SettingsStore', {

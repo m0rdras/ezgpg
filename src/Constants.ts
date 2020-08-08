@@ -10,10 +10,6 @@ export enum Events {
     SAVE_SETTINGS = 'settings:save'
 }
 
-export enum StoreKeys {
-    SETTINGS = 'settings'
-}
-
 export interface GetKeysResponse {
     pubKeys: IGpgKey[];
     error?: Error;

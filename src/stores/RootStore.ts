@@ -50,7 +50,7 @@ export const RootStore = types
     });
 export type IRootStore = Instance<typeof RootStore>;
 
-export default function createRootStore(ipc = ipcRenderer) {
+export default function createRootStore(ipc = ipcRenderer): IRootStore {
     const snapshot: SnapshotIn<typeof RootStore> = {
         cryptStore: {
             input: {
