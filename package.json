@@ -121,7 +121,7 @@
         "babel-loader": "^8.1.0",
         "babel-plugin-styled-components": "^1.11.1",
         "css-loader": "^4.2.0",
-        "electron": "^9.1.2",
+        "electron": "^9.4.0",
         "eslint": "^7.6.0",
         "eslint-config-prettier": "^6.11.0",
         "eslint-plugin-jest": "^23.20.0",
